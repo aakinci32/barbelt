@@ -12,42 +12,43 @@ from django.urls import reverse
 
 
 def facialRecognition(request):
+    print("FACIAL")
 # Load a sample picture and learn how to recognize it.
-    image_path = os.path.join(settings.BASE_DIR,'BarBelt', 'static', 'trump.jpg')
+    image_folder_path = os.path.join(settings.BASE_DIR,'BarBelt', 'static')
+    all_files = os.listdir(image_folder_path)
+    face_encodings_dict = {}
+    for fileName in all_files:
+        if fileName.lower().endswith(('.jpg', '.jpeg', '.png')):
+            image_path = os.path.join(image_folder_path, fileName)
+            image = face_recognition.load_image_file(image_path)
+            if image is None:
+                print("error loading in image")
+            face_encodings_dict[fileName] = face_recognition.face_encodings(image)[0]
+    
 
-    trump_image = face_recognition.load_image_file(image_path)
+    known_face_encodings = []
+    known_face_names = []
+    for fileName,encoding in face_encodings_dict.items():
+        file_name_without_extension = os.path.splitext(fileName)[0]
+        known_face_encodings.append(encoding)
+        known_face_names.append(file_name_without_extension)
 
-    if trump_image is None:
-        print("Error: 'trump.jpg' not loaded.")
-    else:
-        trump_face_encoding = face_recognition.face_encodings(trump_image)[0]
-    # Load a second sample picture and learn how to recognize it.
-    image_path2 = os.path.join(settings.BASE_DIR,'BarBelt', 'static', 'elon.jpg')
 
-    elon_image = face_recognition.load_image_file(image_path2)
-    if elon_image is None:
-        print("Error: 'elon.jpg' not loaded.")
-    else:
-        elon_face_encoding = face_recognition.face_encodings(elon_image)[0]
 
-    # image_path3 = os.path.join(settings.BASE_DIR,'BarBelt', 'static', 'rohan.jpg')
-    # rohan_image = face_recognition.load_image_file(image_path3)
-    # if rohan_image is None:
-    #     print("Error: 'rohan.jpg' not loaded.")
-    # else:
-    #     rohan_face_encoding = face_recognition.face_encodings(rohan_image)[0]
+    print(known_face_names)
 
-    # Create arrays of known face encodings and their names
-    known_face_encodings = [
-        trump_face_encoding,
-        elon_face_encoding,
-        # rohan_face_encoding
-    ]
-    known_face_names = [
-        "Donald Trump",
-        "Elon Musk"
-        # "Rohan Shenoy"
-    ]
+
+
+
+
+
+
+
+
+
+
+
+ 
 
     # Initialize the webcam
 
