@@ -3,11 +3,15 @@ import cv2
 import numpy as np
 import os
 from django.conf import settings
+from django.shortcuts import render, redirect
+from django.urls import reverse
 
 
 
 
-def facialRecognition():
+
+
+def facialRecognition(request):
 # Load a sample picture and learn how to recognize it.
     image_path = os.path.join(settings.BASE_DIR,'BarBelt', 'static', 'trump.jpg')
 
@@ -26,23 +30,23 @@ def facialRecognition():
     else:
         elon_face_encoding = face_recognition.face_encodings(elon_image)[0]
 
-    image_path3 = os.path.join(settings.BASE_DIR,'BarBelt', 'static', 'rohan.jpg')
-    rohan_image = face_recognition.load_image_file(image_path3)
-    if rohan_image is None:
-        print("Error: 'rohan.jpg' not loaded.")
-    else:
-        rohan_face_encoding = face_recognition.face_encodings(rohan_image)[0]
+    # image_path3 = os.path.join(settings.BASE_DIR,'BarBelt', 'static', 'rohan.jpg')
+    # rohan_image = face_recognition.load_image_file(image_path3)
+    # if rohan_image is None:
+    #     print("Error: 'rohan.jpg' not loaded.")
+    # else:
+    #     rohan_face_encoding = face_recognition.face_encodings(rohan_image)[0]
 
     # Create arrays of known face encodings and their names
     known_face_encodings = [
         trump_face_encoding,
         elon_face_encoding,
-        rohan_face_encoding
+        # rohan_face_encoding
     ]
     known_face_names = [
         "Donald Trump",
-        "Elon Musk",
-        "Rohan Shenoy"
+        "Elon Musk"
+        # "Rohan Shenoy"
     ]
 
     # Initialize the webcam
@@ -77,44 +81,29 @@ def facialRecognition():
             # Compare the found faces with known faces
             matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
             name = "Unknown"
+            if True in matches:
+                first_match_index = matches.index(True)
+                name = known_face_names[first_match_index]
+                request.session['name'] = name
+                return redirect('login_successful')
 
-            # Find the known face with the smallest distance to the new face
-            face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
-            best_match_index = np.argmin(face_distances)
-            if matches[best_match_index]:
-                name = known_face_names[best_match_index]
+            else:
+                print("no match")
+                return redirect ('takePhoto')
 
+
+            
             face_names.append(name)
 
         if len(face_names) == 0:
             continue
 
-        # Display the results
-        for (top, right, bottom, left), name in zip(face_locations, face_names):
-            # Scale back up face locations since the frame was resized
-            top *= 4
-            right *= 4
-            bottom *= 4
-            left *= 4
-
-            # Draw a box around the face
-            cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
-
-            # Draw a label with the name below the face
-            cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
-            font = cv2.FONT_HERSHEY_DUPLEX
-            cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
-
-        # Display the resulting image
-        
-        # cv2.imshow('Real-Time Face Recognition', frame)
-        print("HERE")
-        print(name)
-        # Hit 'q' on the keyboard to quit
+       
         if (cv2.waitKey(1) & 0xFF == ord('q')) or name:
-            print(name)
             break
 
     # Release the webcam and close all OpenCV windows
     video_capture.release()
     cv2.destroyAllWindows()
+
+

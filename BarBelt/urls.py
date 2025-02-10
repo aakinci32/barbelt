@@ -23,5 +23,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('',views.homeAction,name = "homeAction"),
     path('\facial',views.facialRecog, name ="facialRecognition"),
+    path('\takePhoto', views.takePhoto, name="takePhoto"),  
+    path('\login',views.login_successful, name = "login_successful"),
+    path('\savePhoto',views.savePhoto,name = "savePhoto"),
 
 ]

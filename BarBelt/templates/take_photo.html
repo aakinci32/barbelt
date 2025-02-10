@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Take Photo</title>
+    <style>
+        /* Style for the camera view and capture button */
+        #camera {
+            width: 320px; /* Set a smaller width */
+            height: 240px; /* Set a smaller height */
+            border: 1px solid #ccc;
+        }
+        #captureBtn {
+            margin-top: 10px;
+        }
+        #photoPreview {
+            margin-top: 20px;
+            display: none;
+            width: 320px; /* Set a smaller width */
+            height: 240px; /* Set a smaller height */
+            border: 1px solid #ccc;
+        }
+        .buttons {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Please enter your name and take a photo</h1>
+
+    <form method="post" action = "{% url 'savePhoto' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <!-- Video element to display the webcam feed -->
+        <video id="camera" autoplay></video>
+
+        <!-- Capture Button -->
+        <button type="button" id="captureBtn">Take Photo</button>
+
+        <!-- Hidden input field to store the captured photo -->
+        <input type="hidden" name="photo" id="photoInput">
+
+        <!-- Preview of the captured photo -->
+        <canvas id="photoPreview"></canvas>
+
+        <div id="photoButtons" class="buttons" style="display:none;">
+            <button type="button" id="retakeBtn">Retake</button>
+            <button type="submit">Submit</button>
+        </div>
+    </form>
+
+    <script>
+        // Accessing the webcam and setting up the video stream
+        const video = document.getElementById('camera');
+        const captureBtn = document.getElementById('captureBtn');
+        const retakeBtn = document.getElementById('retakeBtn');
+        const photoPreview = document.getElementById('photoPreview');
+        const photoInput = document.getElementById('photoInput');
+        const photoButtons = document.getElementById('photoButtons');
+
+        // Start video stream
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                video.srcObject = stream;
+            })
+            .catch(function(error) {
+                console.log("Error accessing webcam: ", error);
+            });
+
+        // Function to capture the photo
+        captureBtn.addEventListener('click', function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // Draw the current video frame onto the canvas
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Show the captured photo on the canvas
+            photoPreview.style.display = 'block';
+            photoPreview.width = canvas.width;
+            photoPreview.height = canvas.height;
+            const ctx = photoPreview.getContext('2d');
+            ctx.drawImage(canvas, 0, 0);
+
+            // Convert the photo to a base64 image string and set it in the hidden input field
+            const photoData = canvas.toDataURL('image/jpeg');
+            photoInput.value = photoData;
+
+            // Show the Retake and Submit buttons
+            photoButtons.style.display = 'block';
+        });
+
+        // Retake button event
+        retakeBtn.addEventListener('click', function() {
+            photoPreview.style.display = 'none';
+            photoButtons.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
