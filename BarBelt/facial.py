@@ -50,12 +50,13 @@ def facialRecognition():
     video_capture = cv2.VideoCapture(1,cv2.CAP_AVFOUNDATION)
     if not video_capture.isOpened():
         print("Error: Could not open webcam.")
-    print("AFTER")
+        return
     while True:
         # Grab a single frame from the webcam
         ret, frame = video_capture.read()
         if not ret:
             print("Failed to capture frame")
+            break
         
 
         # Resize the frame to speed up processing (optional)
@@ -85,6 +86,9 @@ def facialRecognition():
 
             face_names.append(name)
 
+        if len(face_names) == 0:
+            continue
+
         # Display the results
         for (top, right, bottom, left), name in zip(face_locations, face_names):
             # Scale back up face locations since the frame was resized
@@ -104,7 +108,8 @@ def facialRecognition():
         # Display the resulting image
         
         # cv2.imshow('Real-Time Face Recognition', frame)
-
+        print("HERE")
+        print(name)
         # Hit 'q' on the keyboard to quit
         if (cv2.waitKey(1) & 0xFF == ord('q')) or name:
             print(name)
