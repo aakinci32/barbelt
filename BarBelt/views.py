@@ -10,8 +10,14 @@ from django.conf import settings
 from django.http import HttpResponse, Http404
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
+from .facial import facialRecognition
 
 
 def homeAction(request):
-    print("here")
     return render(request,'home.html')
+
+def facialRecog(request):
+    facialRecognition()
+    return render(request,'home.html')
+
+

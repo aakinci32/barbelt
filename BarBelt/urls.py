@@ -21,6 +21,7 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',views.homeAction),
+    path('',views.homeAction,name = "homeAction"),
+    path('\facial',views.facialRecog, name ="facialRecognition"),
 
 ]
