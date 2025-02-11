@@ -87,7 +87,7 @@ def facialRecognition(request):
     print(known_face_names)
     # Initialize the webcam
 
-    video_capture = cv2.VideoCapture(0,cv2.CAP_AVFOUNDATION)
+    video_capture = cv2.VideoCapture(1,cv2.CAP_AVFOUNDATION)
     if not video_capture.isOpened():
         print("Error: Could not open webcam.")
         return
