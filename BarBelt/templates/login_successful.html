@@ -35,9 +35,10 @@
 <body>
 
     <div class="navbar">
-        <a href="#">My Ingredients</a>
-        <a href="#">My Products</a>
-        <a href="#">Suggestions</a>
+        <a href="#">Home</a>
+        <a href="{% url 'ingredients' %}">My Ingredients</a> 
+        <a href="{% url 'products' %}">My Products</a>
+        <a href="{% url 'suggestions' %}">Suggestions</a>
     </div>
 
     <div class="container">

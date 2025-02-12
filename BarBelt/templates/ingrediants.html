@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Ingredients</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        .navbar {
+            background-color: #333;
+            overflow: hidden;
+            padding: 10px;
+        }
+        .navbar a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 20px;
+            text-decoration: none;
+        }
+        .navbar a:hover {
+            background-color: #575757;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        table {
+            width: 60%;
+            margin: auto;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #333;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <a href="#">Home</a>
+        <a href="{% url 'ingredients' %}">My Ingredients</a> 
+        <a href="{% url 'products' %}">My Products</a>
+        <a href="{% url 'suggestions' %}">Suggestions</a>
+    </div>
+
+    <div class="container">
+        <h1>My Ingredients</h1>
+        <table>
+            <tr>
+                <th>Ingredient</th>
+                <th>Type</th>
+                <th>Amount (ml)</th>
+            </tr>
+            <tr>
+                <td>Vodka</td>
+                <td>Alcohol</td>
+                <td>100</td>
+            </tr>
+            <tr>
+                <td>Tequila</td>
+                <td>Alcohol</td>
+                <td>100</td>
+            </tr>
+            <tr>
+                <td>Orange Juice</td>
+                <td>Mixer</td>
+                <td>100</td>
+            </tr>
+            <tr>
+                <td>Ginger Beer</td>
+                <td>Mixer</td>
+                <td>100</td>
+            </tr>
+            <tr>
+                <td>Lime Juice</td>
+                <td>Mixer</td>
+                <td>100</td>
+            </tr>
+            <tr>
+                <td>Club Soda</td>
+                <td>Mixer</td>
+                <td>100</td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Products</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .navbar {
+            background-color: #333;
+            overflow: hidden;
+            padding: 10px;
+        }
+        .navbar a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 20px;
+            text-decoration: none;
+        }
+        .navbar a:hover {
+            background-color: #575757;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="#">Home</a>
+        <a href="{% url 'ingredients' %}">My Ingredients</a> 
+        <a href="{% url 'products' %}">My Products</a>
+        <a href="{% url 'suggestions' %}">Suggestions</a>
+    </div>
+    <h1>My Products</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Ingredient 1 (mL)</th>
+                <th>Ingredient 2 (mL)</th>
+                <th>Ingredient 3 (mL)</th>
+                <th>Ingredient 4 (mL)</th>
+                <th>Ingredient 5 (mL)</th>
+                <th>Ingredient 6 (mL)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Moscow Mule</td>
+                <td>Vodka (50mL)</td>
+                <td>Ginger Beer (150mL)</td>
+                <td>Lime Juice (10mL)</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+            </tr>
+            <tr>
+                <td>Tequila Sunrise</td>
+                <td>Tequila (50mL)</td>
+                <td>Orange Juice (150mL)</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+            </tr>
+            <tr>
+                <td>Vodka Soda</td>
+                <td>Vodka (50mL)</td>
+                <td>Club Soda (150mL)</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+            </tr>
+            <tr>
+                <td>Mexican Mule</td>
+                <td>Tequila (50mL)</td>
+                <td>Ginger Beer (150mL)</td>
+                <td>Lime Juice (10mL)</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+            </tr>
+            <tr>
+                <td>Screwdriver</td>
+                <td>Vodka (50mL)</td>
+                <td>Orange Juice (150mL)</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+            </tr>
+            <tr>
+                <td>Tequila Soda</td>
+                <td>Tequila (50mL)</td>
+                <td>Club Soda (150mL)</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

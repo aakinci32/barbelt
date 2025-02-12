@@ -20,7 +20,15 @@ import os
 from django.conf import settings
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from openai import OpenAI
+import json
+from django.http import JsonResponse
+from dotenv import load_dotenv
 
+
+load_dotenv()
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 def homeAction(request):
@@ -54,14 +62,12 @@ def savePhoto(request):
                 request.session['name'] = name
                 with open(image_path, 'wb') as f:
                     f.write(imgdata)
-                print("success")
                 return redirect('login_successful') 
 
     return render(request, 'take_photo.html', {'form': NewFaceForm()})
 
 
 def facialRecognition(request):
-    print("FACIAL")
 
 # Load a sample picture and learn how to recognize it.
     image_folder_path = os.path.join(settings.BASE_DIR,'BarBelt', 'static')
@@ -124,7 +130,6 @@ def facialRecognition(request):
                 return redirect('login_successful')
 
             else:
-                print("no match")
                 return redirect ('takePhoto')
 
 
@@ -141,6 +146,42 @@ def facialRecognition(request):
     # Release the webcam and close all OpenCV windows
     video_capture.release()
     cv2.destroyAllWindows()
+
+def ingredients(request):
+    return render(request,'ingrediants.html')
+
+def products(request):
+    return render(request,'products.html')
+
+def suggestions(request):
+    return render(request,'suggest.html')
+
+def processRequest(request):
+    if request.method == 'POST':
+        request_prompt = request.POST.get('request')
+        print(request_prompt)
+        response = client.chat.completions.create(model="gpt-3.5-turbo",  # You can also use "gpt-4" if you have access
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": request_prompt}
+            ],
+        temperature=0.7,
+        max_tokens=40)
+        response_data = response.choices[0].message.content
+        response_dict = {'response': response_data}
+        try:
+            
+            return JsonResponse(response_dict)
+        except:
+            print("error in json")
+            return JsonResponse({'error': 'Invalid JSON response', 'message': response_data}, status=500)
+
+    return JsonResponse({'error': 'Invalid JSON response', 'message': response_data}, status=500)
+
+
+
+
+
 
 
 
