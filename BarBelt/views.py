@@ -25,6 +25,8 @@ from openai import OpenAI
 import json
 from django.http import JsonResponse
 from dotenv import load_dotenv
+from .constants import INGREDIENT_PIN_MAPPING
+
 
 
 load_dotenv()
@@ -185,6 +187,18 @@ def submitCart(request):
         
         # For debugging: print the selected indices
         print(f"Selected Ingredient Indices: {selected_indices}")
+        pins = []
+        for indice in selected_indices:
+            if indice in INGREDIENT_PIN_MAPPING:
+                pins.append(INGREDIENT_PIN_MAPPING[indice])
+            else:
+                print("indice not found")
+        
+        print(f"Corresponding pin layout: {pins}")
+
+        
+        
+
     return redirect('ingredients')
 
 
