@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth.models import User
+from .models import Ingredient
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -89,8 +90,6 @@ def facialRecognition(request):
         known_face_encodings.append(encoding)
         known_face_names.append(file_name_without_extension)
 
- 
-    print(known_face_names)
     # Initialize the webcam
 
     video_capture = cv2.VideoCapture(1,cv2.CAP_AVFOUNDATION)
@@ -125,7 +124,7 @@ def facialRecognition(request):
             name = "Unknown"
             if True in matches:
                 first_match_index = matches.index(True)
-                name =  [first_match_index]
+                name =  known_face_names[first_match_index]
                 request.session['name'] = name
                 return redirect('login_successful')
 
@@ -148,7 +147,9 @@ def facialRecognition(request):
     cv2.destroyAllWindows()
 
 def ingredients(request):
-    return render(request,'ingrediants.html')
+    ingredients = Ingredient.objects.all()
+    context = {'ingredients':ingredients}
+    return render(request,'ingrediants.html',context)
 
 def products(request):
     return render(request,'products.html')
@@ -177,6 +178,14 @@ def processRequest(request):
             return JsonResponse({'error': 'Invalid JSON response', 'message': response_data}, status=500)
 
     return JsonResponse({'error': 'Invalid JSON response', 'message': response_data}, status=500)
+
+def submitCart(request):
+    if request.method == 'POST':
+        selected_indices = request.POST.getlist('selected_ingredients')
+        
+        # For debugging: print the selected indices
+        print(f"Selected Ingredient Indices: {selected_indices}")
+    return redirect('ingredients')
 
 
 

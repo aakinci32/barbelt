@@ -30,5 +30,6 @@ urlpatterns = [
     path('\products',views.products,name = 'products'),
     path('\submitRequest',views.processRequest,name = 'submit_request'),
     path('\suggestions',views.suggestions,name = 'suggestions'),
+    path('\submitCart',views.submitCart,name = 'submit_cart'),
 
 ]

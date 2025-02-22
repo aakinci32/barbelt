@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Ingredients</title>
     <style>
+         /* Make the clickable ingredient name look like a button */
+    .ingredient-clickable {
+        color: #007bff;
+        text-decoration: none;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .ingredient-clickable:hover {
+        text-decoration: underline;
+        color: #0056b3;
+    }
+
+    /* Optional: Add some padding and background color to the selected ingredient list */
+    #ingredient-list li {
+        padding: 5px;
+        border: 1px solid #ddd;
+        margin-bottom: 5px;
+    }
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -58,50 +77,59 @@
 
     <div class="container">
         <h1>My Ingredients</h1>
+        <h2>Please click on any you want to add to your cart</h2>
         <table>
             <tr>
                 <th>Ingredient</th>
                 <th>Type</th>
                 <th>Amount (ml)</th>
             </tr>
+            {% for ingredient in ingredients %}
             <tr>
-                <td>Vodka</td>
-                <td>Alcohol</td>
-                <td>100</td>
+                <td><a href="#" class="ingredient-clickable" data-name="{{ ingredient.name }}" data-type="{{ ingredient.type }}" data-amount="{{ ingredient.amount }}" data-index="{{ forloop.counter0 }}">{{ ingredient.name }}</a></td>
+                <td>{{ ingredient.type }}</td>
+                <td>hello</td>
             </tr>
-            <tr>
-                <td>Tequila</td>
-                <td>Alcohol</td>
-                <td>100</td>
-            </tr>
-            <tr>
-                <td>Orange Juice</td>
-                <td>Mixer</td>
-                <td>100</td>
-            </tr>
-            <tr>
-                <td>Ginger Beer</td>
-                <td>Mixer</td>
-                <td>100</td>
-            </tr>
-            <tr>
-                <td>Lime Juice</td>
-                <td>Mixer</td>
-                <td>100</td>
-            </tr>
-            <tr>
-                <td>Club Soda</td>
-                <td>Mixer</td>
-                <td>100</td>
-            </tr>
+            {% empty %}
+                <li>No ingredients added yet</li>
+            {% endfor %}
         </table>
-    </div>
-    <form action="{% url 'add_ingredient' %}" method="post">
-        {% csrf_token %}
 
-        <label for = "addIngrediant">Add ingrediant by name</label><br>
-        <input type="text" name="ingredient" required>
-        <input type="submit" value="Add Ingredient">
-    </form>
+        <h2>Your Selected Ingredients</h2>
+            <form method="post" action = "{% url 'submit_cart' %}">
+                {% csrf_token %}
+                <ul id="ingredient-list"></ul> <!-- List of selected ingredients -->
+                <input type="submit" value="Submit Cart">
+            </form>
+
+
+    </div>
+
+    <script>
+            document.querySelectorAll('.ingredient-clickable').forEach(item => {
+            item.addEventListener('click', function(event) {
+                event.preventDefault();
+
+                const name = item.getAttribute('data-name');
+                const index = item.getAttribute('data-index');
+
+                // Create a new list item for the selected ingredient
+                const listItem = document.createElement('li');
+                listItem.textContent = `${name}`;  // Show the name in the list
+
+                // Create a hidden input to store the index of the selected ingredient
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'selected_ingredients';  // All indices are named the same
+                hiddenInput.value = index;  // Set the index as the value
+
+                // Append the hidden input to the list item
+                listItem.appendChild(hiddenInput);
+
+                // Add the selected ingredient name to the list
+                document.getElementById('ingredient-list').appendChild(listItem);
+            });
+        });
+    </script>
 </body>
 </html>
