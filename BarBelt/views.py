@@ -125,7 +125,7 @@ def facialRecognition(request):
             name = "Unknown"
             if True in matches:
                 first_match_index = matches.index(True)
-                name = known_face_names[first_match_index]
+                name =  [first_match_index]
                 request.session['name'] = name
                 return redirect('login_successful')
 
