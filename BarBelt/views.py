@@ -26,6 +26,7 @@ import json
 from django.http import JsonResponse
 from dotenv import load_dotenv
 from .constants import INGREDIENT_PIN_MAPPING
+from .arduino import callArduino
 
 
 
@@ -192,8 +193,6 @@ def submitCart(request):
         selected_amounts = {}
         
         # For debugging: print the selected indices
-        print(f"Selected Ingredient Indices: {selected_indices}")
-        pins = []
         for indice in selected_indices:
             amount_key = f"amount_{indice}_hidden"  # Corresponding hidden input field for the amount
             amount_value = request.POST.get(amount_key)
@@ -202,15 +201,9 @@ def submitCart(request):
             else:
                 print(f"amount for indice: {indice} not found")
 
-            if indice in INGREDIENT_PIN_MAPPING:
-                pins.append(INGREDIENT_PIN_MAPPING[indice])
-                
-            else:
-                print("indice not found")
+            
         
-        print(f"Corresponding pin layout: {pins}")
-        print(f"Corresponding amounts {selected_amounts}")
-
+        sendArduino(selected_indices,selected_amounts)
         for index in selected_indices:
             db_index = int(index) + 1
             ingredient = Ingredient.objects.get(id = db_index)
@@ -222,14 +215,27 @@ def submitCart(request):
                     print(f"Updated {ingredient.name} amount to {ingredient.amount} mL")
                 else:
                     print(f"Error: Not enough amount for {ingredient.name}")
-    print("before")
-    url = resolve_url('ingredients')  # Resolve the named URL to its actual path
-    print(f"Redirecting to: {url}")  # Debug print   
+    
     return redirect('ingredients')
 
-def debug_ingredients(request):
-    print("Debug: ingredients view was called")
-    return HttpResponse("Debug: Ingredients page")
+def sendArduino(selected_indices,selected_amounts):
+    
+    print("Ready to send")
+    pins_dict = {}
+    for index in selected_indices:
+
+        corresponding_amount = selected_amounts[index]
+        corresponding_pin = INGREDIENT_PIN_MAPPING[index]
+        pins_dict[corresponding_pin] = corresponding_amount
+    
+    print(pins_dict)
+    callArduino(pins_dict)
+
+
+    
+    return
+
+
 
    
 
