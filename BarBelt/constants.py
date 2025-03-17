@@ -8,6 +8,6 @@ INGREDIENT_PIN_MAPPING = {
 }
 
 #CHANGE THIS VALUE WITH EXPERIMENTATION
-ML_TO_SEC = 2 #ratio of amount of liquid in ML dispensed to seconds leaving solenoid valve open
+ML_TO_SEC_RATIO = 2 #ratio of amount of liquid in ML dispensed to seconds leaving solenoid valve open
 1
 
