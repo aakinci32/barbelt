@@ -28,7 +28,6 @@ void loop() {
       Serial.println(state == 1 ? "HIGH" : "LOW");
     
     }
-  // put your main code here, to run repeatedly:
 
   }
 

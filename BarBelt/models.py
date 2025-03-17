@@ -12,7 +12,7 @@ class User(models.Model):
 class Ingredient(models.Model):
     name = models.CharField(max_length = 100)
     type = models.CharField(max_length = 100)
-    amount = models.FloatField()
+    amount = models.FloatField(default = 100)
 
 
     

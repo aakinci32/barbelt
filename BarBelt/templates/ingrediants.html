@@ -88,7 +88,7 @@
             <tr>
                 <td><a href="#" class="ingredient-clickable" data-name="{{ ingredient.name }}" data-type="{{ ingredient.type }}" data-amount="{{ ingredient.amount }}" data-index="{{ forloop.counter0 }}">{{ ingredient.name }}</a></td>
                 <td>{{ ingredient.type }}</td>
-                <td>hello</td>
+                <td>{{ingredient.amount}}mL</td>
             </tr>
             {% empty %}
                 <li>No ingredients added yet</li>
@@ -104,32 +104,57 @@
 
 
     </div>
-
     <script>
-            document.querySelectorAll('.ingredient-clickable').forEach(item => {
-            item.addEventListener('click', function(event) {
-                event.preventDefault();
+    document.querySelectorAll('.ingredient-clickable').forEach(item => {
+        item.addEventListener('click', function(event) {
+            event.preventDefault();
 
-                const name = item.getAttribute('data-name');
-                const index = item.getAttribute('data-index');
+            const name = item.getAttribute('data-name');
+            const index = item.getAttribute('data-index');
+            const maxAmount = parseFloat(item.getAttribute('data-amount'));  // Get original max amount
 
-                // Create a new list item for the selected ingredient
-                const listItem = document.createElement('li');
-                listItem.textContent = `${name}`;  // Show the name in the list
+            // Create a new list item for the selected ingredient
+            const listItem = document.createElement('li');
 
-                // Create a hidden input to store the index of the selected ingredient
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'selected_ingredients';  // All indices are named the same
-                hiddenInput.value = index;  // Set the index as the value
+            // Create a text input for the user to enter the amount
+            const amountInput = document.createElement('input');
+            amountInput.type = 'number';
+            amountInput.name = `amount_${index}`;  // Unique name per ingredient
+            amountInput.placeholder = 'Enter amount (ml)';
+            amountInput.required = true;
+            amountInput.min = "1";
+            amountInput.max = maxAmount;  // Prevent entering more than available
 
-                // Append the hidden input to the list item
-                listItem.appendChild(hiddenInput);
+            // Create a hidden input to store the ingredient index
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'selected_ingredients';
+            hiddenInput.value = index;  // Stores the index for form submission
 
-                // Add the selected ingredient name to the list
-                document.getElementById('ingredient-list').appendChild(listItem);
-            });
+
+
+            // Create a hidden input for the amount entered by the user
+            const hiddenAmountInput = document.createElement('input');
+            hiddenAmountInput.type = 'hidden';
+            hiddenAmountInput.name = `amount_${index}_hidden`;  // Unique name for hidden amount
+            hiddenAmountInput.value = amountInput.value;  // Initially set to the value from the amount input
+
+            // Add the name, input field, and hidden input to the list item
+            listItem.textContent = `${name} - `;
+            listItem.appendChild(amountInput);
+            listItem.appendChild(hiddenInput);
+            listItem.appendChild(hiddenAmountInput);
+
+            // Add the list item to the selected ingredient list
+            document.getElementById('ingredient-list').appendChild(listItem);
+
+            amountInput.addEventListener('input', function() {
+            hiddenAmountInput.value = amountInput.value;
         });
-    </script>
+        });
+    });
+</script>
+    
+    
 </body>
 </html>

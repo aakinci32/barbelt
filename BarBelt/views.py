@@ -19,7 +19,7 @@ import cv2
 import numpy as np
 import os
 from django.conf import settings
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,resolve_url
 from django.urls import reverse
 from openai import OpenAI
 import json
@@ -148,7 +148,10 @@ def facialRecognition(request):
     video_capture.release()
     cv2.destroyAllWindows()
 
+
+
 def ingredients(request):
+    
     ingredients = Ingredient.objects.all()
     context = {'ingredients':ingredients}
     return render(request,'ingrediants.html',context)
@@ -183,23 +186,52 @@ def processRequest(request):
 
 def submitCart(request):
     if request.method == 'POST':
+        print("submit")
+        print()
         selected_indices = request.POST.getlist('selected_ingredients')
+        selected_amounts = {}
         
         # For debugging: print the selected indices
         print(f"Selected Ingredient Indices: {selected_indices}")
         pins = []
         for indice in selected_indices:
+            amount_key = f"amount_{indice}_hidden"  # Corresponding hidden input field for the amount
+            amount_value = request.POST.get(amount_key)
+            if amount_value:
+                selected_amounts[indice] = float(amount_value)
+            else:
+                print(f"amount for indice: {indice} not found")
+
             if indice in INGREDIENT_PIN_MAPPING:
                 pins.append(INGREDIENT_PIN_MAPPING[indice])
+                
             else:
                 print("indice not found")
         
         print(f"Corresponding pin layout: {pins}")
+        print(f"Corresponding amounts {selected_amounts}")
 
-        
-        
-
+        for index in selected_indices:
+            db_index = int(index) + 1
+            ingredient = Ingredient.objects.get(id = db_index)
+            if ingredient:
+                amount_used = selected_amounts[index]
+                if ingredient.amount >= amount_used:
+                    ingredient.amount -= amount_used
+                    ingredient.save()
+                    print(f"Updated {ingredient.name} amount to {ingredient.amount} mL")
+                else:
+                    print(f"Error: Not enough amount for {ingredient.name}")
+    print("before")
+    url = resolve_url('ingredients')  # Resolve the named URL to its actual path
+    print(f"Redirecting to: {url}")  # Debug print   
     return redirect('ingredients')
+
+def debug_ingredients(request):
+    print("Debug: ingredients view was called")
+    return HttpResponse("Debug: Ingredients page")
+
+   
 
 
 
