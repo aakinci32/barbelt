@@ -1,6 +1,30 @@
+#include <Arduino.h>
+
+#define dirPin 2
+#define stepPin 3
+
+const float stepsPerDegree = 1600.0 / 360.0;  // 4.44 steps per degree
+const int stepDelay = 2000;  // Adjust for speed (higher = slower)
+int currentAngle = 0;
+
 void setup() {
   Serial.begin(9600);  // Start serial communication
-  // You can initialize pin modes here if you know which pins you're using
+  pinMode(stepPin, OUTPUT);
+  pinMode(dirPin, OUTPUT);
+}
+
+void rotateByDegrees(int degrees, bool clockwise) {
+  int steps = degrees * stepsPerDegree;
+  digitalWrite(dirPin, clockwise ? HIGH : LOW);  // HIGH = CW, LOW = CCW
+
+  for (int i = 0; i < steps; i++) {
+    digitalWrite(stepPin, HIGH);
+    delayMicroseconds(stepDelay);
+    digitalWrite(stepPin, LOW);
+    delayMicroseconds(stepDelay);
+  }
+  
+  currentAngle += (clockwise ? degrees : -degrees);
 }
 
 void loop() {
@@ -16,22 +40,33 @@ void loop() {
       int state = command.substring(commaIndex1 + 1, commaIndex2).toInt();  // Extract state (1 or 0)
       int delay_time = command.substring(commaIndex2 + 1).toInt();  // Extract delay time (in seconds)
 
-      pinMode(pin, OUTPUT);  // Set the pin mode to OUTPUT if it's not already
+      pinMode(pin, OUTPUT);  // Set the pin mode to OUTPUT
 
-      // Set pin to HIGH or LOW
       if (state == 1) {
-        digitalWrite(pin, HIGH);  // Set pin HIGH
+        digitalWrite(pin, HIGH);  // Open valve
         Serial.print("Pin ");
         Serial.print(pin);
-        Serial.print(" set to HIGH for ");
-        Serial.print(delay_time);
-        Serial.println(" seconds.");
+        Serial.println(" set to HIGH (Valve Open).");
+
+        rotateByDegrees(90, true);  // Rotate wheel forward 90 degrees
+
+        Serial.print("Rotated wheel to ");
+        Serial.print(currentAngle);
+        Serial.println(" degrees.");
+
         delay(delay_time * 1000);  // Wait for the specified delay time (convert seconds to milliseconds)
+
       } else {
-        digitalWrite(pin, LOW);  // Set pin LOW
+        digitalWrite(pin, LOW);  // Close valve
         Serial.print("Pin ");
         Serial.print(pin);
-        Serial.println(" set to LOW.");
+        Serial.println(" set to LOW (Valve Closed).");
+
+        rotateByDegrees(90, false);  // Rotate wheel back 90 degrees
+
+        Serial.print("Rotated wheel to ");
+        Serial.print(currentAngle);
+        Serial.println(" degrees.");
       }
     }
   }
