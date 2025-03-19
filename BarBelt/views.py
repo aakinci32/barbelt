@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth.models import User
-from .models import Ingredient
+from .models import Ingredient,Garnish
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -25,7 +25,7 @@ from openai import OpenAI
 import json
 from django.http import JsonResponse
 from dotenv import load_dotenv
-from .constants import INGREDIENT_PIN_MAPPING
+from .constants import INGREDIENT_PIN_MAPPING,GARNISH_ANGLE_MAPPING
 from .arduino import callArduino
 
 
@@ -154,7 +154,8 @@ def facialRecognition(request):
 def ingredients(request):
     
     ingredients = Ingredient.objects.all()
-    context = {'ingredients':ingredients}
+    garnishes = Garnish.objects.all()
+    context = {'ingredients':ingredients, 'garnishes':garnishes}
     return render(request,'ingrediants.html',context)
 
 def products(request):
@@ -190,6 +191,10 @@ def submitCart(request):
         print("submit")
         print()
         selected_indices = request.POST.getlist('selected_ingredients')
+        selected_garnish_list = request.POST.getlist('selected_garnish')
+        selected_garnish_index = selected_garnish_list[0]
+        print("Selected Garnish Indices: ", selected_garnish_index)
+
         selected_amounts = {}
         
         # For debugging: print the selected indices
@@ -203,7 +208,7 @@ def submitCart(request):
 
             
         
-        sendArduino(selected_indices,selected_amounts)
+        sendArduino(selected_indices,selected_amounts,selected_garnish_index)
         for index in selected_indices:
             db_index = int(index) + 1
             ingredient = Ingredient.objects.get(id = db_index)
@@ -218,7 +223,7 @@ def submitCart(request):
     
     return redirect('ingredients')
 
-def sendArduino(selected_indices,selected_amounts):
+def sendArduino(selected_indices,selected_amounts,selected_garnish_index):
     
     print("Ready to send")
     pins_dict = {}
@@ -228,8 +233,13 @@ def sendArduino(selected_indices,selected_amounts):
         corresponding_pin = INGREDIENT_PIN_MAPPING[index]
         pins_dict[corresponding_pin] = corresponding_amount
     
+        garnishAngle = GARNISH_ANGLE_MAPPING[selected_garnish_index]
+
+
+    
     print(pins_dict)
-    callArduino(pins_dict)
+    print(garnishAngle)
+    callArduino(pins_dict,garnishAngle)
 
 
     

@@ -98,7 +98,6 @@
             {% endfor %}
         </table>
 
-        <!-- Garnishes Table moved above the cart -->
         <h2>Garnishes (Choose one)</h2>
         <table>
             <tr>
@@ -106,27 +105,17 @@
                 <th>Type</th>
                 <th>Amount</th>
             </tr>
-            <tr>
-                <td><a href="#" class="garnish-clickable" data-name="Cherry" data-type="Fruit" data-amount="1" data-index="0">Cherry</a></td>
-                <td>Fruit</td>
-                <td>1</td>
-            </tr>
-            <tr>
-                <td><a href="#" class="garnish-clickable" data-name="Orange" data-type="Fruit" data-amount="1" data-index="1">Orange</a></td>
-                <td>Fruit</td>
-                <td>1</td>
-            </tr>
-            <tr>
-                <td><a href="#" class="garnish-clickable" data-name="Lime" data-type="Fruit" data-amount="1" data-index="2">Lime</a></td>
-                <td>Fruit</td>
-                <td>1</td>
-            </tr>
-            <tr>
-                <td><a href="#" class="garnish-clickable" data-name="Lemon" data-type="Fruit" data-amount="1" data-index="3">Lemon</a></td>
-                <td>Fruit</td>
-                <td>1</td>
-            </tr>
+            {% for garnish in garnishes %}
+                <tr>
+                    <td><a href="#" class="garnish-clickable" data-name="{{ garnish.name }}" data-type="Fruit" data-amount="{{ garnish.amount }}" data-index="{{ forloop.counter0 }}">{{ garnish.name }}</a></td>
+                    <td>Fruit</td>
+                    <td>{{ garnish.amount }} mL</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="3">No garnishes available</td></tr>
+            {% endfor %}
         </table>
+
 
         
 
@@ -201,29 +190,30 @@
         });
         
         // For garnish selection (only one garnish at a time)
+        // For garnish selection (only one garnish at a time)
         document.querySelectorAll('.garnish-clickable').forEach(item => {
             item.addEventListener('click', function(event) {
                 event.preventDefault();
-        
+
                 const name = item.getAttribute('data-name');
                 const index = item.getAttribute('data-index');
-        
+
                 // If a garnish is already selected, remove the previous selection
                 if (selectedGarnish !== null) {
                     selectedGarnish.classList.remove('selected');
                     selectedGarnishInput.parentElement.remove();
                 }
-        
+
                 // Mark the new garnish as selected
                 selectedGarnish = item;
                 selectedGarnish.classList.add('selected');
-        
-                // Create a new hidden input for the selected garnish
+
+                // Create a new hidden input for the selected garnish index
                 selectedGarnishInput = document.createElement('input');
                 selectedGarnishInput.type = 'hidden';
                 selectedGarnishInput.name = 'selected_garnish';  // Only one selected garnish
                 selectedGarnishInput.value = index;
-        
+
                 // Add the hidden input to the form
                 const garnishList = document.getElementById('ingredient-list');
                 const garnishListItem = document.createElement('li');
@@ -232,6 +222,7 @@
                 garnishList.appendChild(garnishListItem);
             });
         });
+
         
         // Form validation before submitting
         document.querySelector('form').addEventListener('submit', function(event) {

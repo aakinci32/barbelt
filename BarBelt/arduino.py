@@ -2,7 +2,7 @@ import serial
 import time
 from .constants import ML_TO_SEC_RATIO
 
-def callArduino(pins):
+def callArduino(pins,garnishAngle):
     
     
     
@@ -11,11 +11,15 @@ def callArduino(pins):
     arduino = serial.Serial('/dev/cu.usbmodem101', 9600, timeout=1)  # Update with your correct serial port
     time.sleep(2)  # Give some time for the Arduino to reset
 
+    command = f"Garnish {garnishAngle}\n" #sending garnish angle to arduino for wheel to rotate
+    arduino.write(command.encode())  # Send command to Arduino
+    print(f"Sent to Arduino: {command.strip()}")
+
     for pin, amount in pins.items():  # Iterate over the dictionary of pins and amounts
         delayAmount = amount / ML_TO_SEC_RATIO  # Calculate the delay based on amount in mL
 
         # Send the pin number, state (HIGH), and delay time (in seconds)
-        command = f"{pin},1,{delayAmount}\n"  # Include the delayAmount in the command
+        command = f"Ingredient {pin},1,{delayAmount}\n"  # Include the delayAmount in the command
         arduino.write(command.encode())  # Send command to Arduino
         print(f"Sent to Arduino: {command.strip()}")  # Debug output
         time.sleep(2)  # Wait for the command to take effect

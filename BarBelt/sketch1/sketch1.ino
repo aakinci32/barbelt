@@ -30,8 +30,15 @@ void rotateByDegrees(int degrees, bool clockwise) {
 void loop() {
   if (Serial.available() > 0) {
     String command = Serial.readStringUntil('\n');  // Read command from serial
-
-    // Example format: pin_number,state,delay_time (e.g., "13,1,2" for HIGH on pin 13 for 2 seconds)
+    if (command.startsWith("Garnish")){
+      int garnishAngle = command.substring(8).toInt(); 
+       // Extract the angle
+      Serial.print("Garnish Angle: ");
+      Serial.println(garnishAngle);
+      rotateByDegrees(garnishAngle, true);  // Rotate wheel forward 90 degrees
+    }
+    else{
+      // Example format: pin_number,state,delay_time (e.g., "13,1,2" for HIGH on pin 13 for 2 seconds)
     int commaIndex1 = command.indexOf(',');
     int commaIndex2 = command.indexOf(',', commaIndex1 + 1);
 
@@ -48,11 +55,6 @@ void loop() {
         Serial.print(pin);
         Serial.println(" set to HIGH (Valve Open).");
 
-        rotateByDegrees(90, true);  // Rotate wheel forward 90 degrees
-
-        Serial.print("Rotated wheel to ");
-        Serial.print(currentAngle);
-        Serial.println(" degrees.");
 
         delay(delay_time * 1000);  // Wait for the specified delay time (convert seconds to milliseconds)
 
@@ -61,14 +63,11 @@ void loop() {
         Serial.print("Pin ");
         Serial.print(pin);
         Serial.println(" set to LOW (Valve Closed).");
-
-        rotateByDegrees(90, false);  // Rotate wheel back 90 degrees
-
-        Serial.print("Rotated wheel to ");
-        Serial.print(currentAngle);
-        Serial.println(" degrees.");
       }
     }
   }
+
+    }
+    
 }
 
