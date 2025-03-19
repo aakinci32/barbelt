@@ -15,4 +15,8 @@ class Ingredient(models.Model):
     amount = models.FloatField(default = 100)
 
 
+class Garnish(models.Model):
+    name = models.CharField(max_length = 100)
+    amount = models.IntegerField(default = 4)
+
     

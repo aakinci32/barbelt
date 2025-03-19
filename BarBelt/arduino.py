@@ -8,7 +8,7 @@ def callArduino(pins):
     
     
     
-    arduino = serial.Serial('/dev/cu.usbmodem1101', 9600, timeout=1)  # Update with your correct serial port
+    arduino = serial.Serial('/dev/cu.usbmodem101', 9600, timeout=1)  # Update with your correct serial port
     time.sleep(2)  # Give some time for the Arduino to reset
 
     for pin, amount in pins.items():  # Iterate over the dictionary of pins and amounts

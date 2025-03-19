@@ -5,25 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Ingredients</title>
     <style>
-         /* Make the clickable ingredient name look like a button */
-    .ingredient-clickable {
-        color: #007bff;
-        text-decoration: none;
-        cursor: pointer;
-        font-weight: bold;
-    }
+        /* Make the clickable ingredient name look like a button */
+        .ingredient-clickable {
+            color: #007bff;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
 
-    .ingredient-clickable:hover {
-        text-decoration: underline;
-        color: #0056b3;
-    }
+        .ingredient-clickable:hover {
+            text-decoration: underline;
+            color: #0056b3;
+        }
 
-    /* Optional: Add some padding and background color to the selected ingredient list */
-    #ingredient-list li {
-        padding: 5px;
-        border: 1px solid #ddd;
-        margin-bottom: 5px;
-    }
+        /* Optional: Add some padding and background color to the selected ingredient list */
+        #ingredient-list li {
+            padding: 5px;
+            border: 1px solid #ddd;
+            margin-bottom: 5px;
+        }
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -78,6 +78,9 @@
     <div class="container">
         <h1>My Ingredients</h1>
         <h2>Please click on any you want to add to your cart</h2>
+
+
+        <h2>Ingredients Table</h2>
         <table>
             <tr>
                 <th>Ingredient</th>
@@ -95,6 +98,39 @@
             {% endfor %}
         </table>
 
+        <!-- Garnishes Table moved above the cart -->
+        <h2>Garnishes (Choose one)</h2>
+        <table>
+            <tr>
+                <th>Garnish</th>
+                <th>Type</th>
+                <th>Amount</th>
+            </tr>
+            <tr>
+                <td><a href="#" class="garnish-clickable" data-name="Cherry" data-type="Fruit" data-amount="1" data-index="0">Cherry</a></td>
+                <td>Fruit</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <td><a href="#" class="garnish-clickable" data-name="Orange" data-type="Fruit" data-amount="1" data-index="1">Orange</a></td>
+                <td>Fruit</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <td><a href="#" class="garnish-clickable" data-name="Lime" data-type="Fruit" data-amount="1" data-index="2">Lime</a></td>
+                <td>Fruit</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <td><a href="#" class="garnish-clickable" data-name="Lemon" data-type="Fruit" data-amount="1" data-index="3">Lemon</a></td>
+                <td>Fruit</td>
+                <td>1</td>
+            </tr>
+        </table>
+
+        
+
+        <!-- Selected Ingredients Cart Section -->
         <h2>Your Selected Ingredients</h2>
             <form method="post" action = "{% url 'submit_cart' %}">
                 {% csrf_token %}
@@ -102,58 +138,113 @@
                 <input type="submit" value="Submit Cart">
             </form>
 
-
     </div>
+    
     <script>
-    document.querySelectorAll('.ingredient-clickable').forEach(item => {
-        item.addEventListener('click', function(event) {
-            event.preventDefault();
-
-            const name = item.getAttribute('data-name');
-            const index = item.getAttribute('data-index');
-            const maxAmount = parseFloat(item.getAttribute('data-amount'));  // Get original max amount
-
-            // Create a new list item for the selected ingredient
-            const listItem = document.createElement('li');
-
-            // Create a text input for the user to enter the amount
-            const amountInput = document.createElement('input');
-            amountInput.type = 'number';
-            amountInput.name = `amount_${index}`;  // Unique name per ingredient
-            amountInput.placeholder = 'Enter amount (ml)';
-            amountInput.required = true;
-            amountInput.min = "1";
-            amountInput.max = maxAmount;  // Prevent entering more than available
-
-            // Create a hidden input to store the ingredient index
-            const hiddenInput = document.createElement('input');
-            hiddenInput.type = 'hidden';
-            hiddenInput.name = 'selected_ingredients';
-            hiddenInput.value = index;  // Stores the index for form submission
-
-
-
-            // Create a hidden input for the amount entered by the user
-            const hiddenAmountInput = document.createElement('input');
-            hiddenAmountInput.type = 'hidden';
-            hiddenAmountInput.name = `amount_${index}_hidden`;  // Unique name for hidden amount
-            hiddenAmountInput.value = amountInput.value;  // Initially set to the value from the amount input
-
-            // Add the name, input field, and hidden input to the list item
-            listItem.textContent = `${name} - `;
-            listItem.appendChild(amountInput);
-            listItem.appendChild(hiddenInput);
-            listItem.appendChild(hiddenAmountInput);
-
-            // Add the list item to the selected ingredient list
-            document.getElementById('ingredient-list').appendChild(listItem);
-
-            amountInput.addEventListener('input', function() {
-            hiddenAmountInput.value = amountInput.value;
+        // Track selected ingredients
+        let selectedIngredients = [];
+        
+        // Track selected garnish
+        let selectedGarnish = null; 
+        let selectedGarnishInput = null; 
+        
+        // For ingredient selection
+        document.querySelectorAll('.ingredient-clickable').forEach(item => {
+            item.addEventListener('click', function(event) {
+                event.preventDefault();
+        
+                const name = item.getAttribute('data-name');
+                const index = item.getAttribute('data-index');
+                const maxAmount = parseFloat(item.getAttribute('data-amount'));
+        
+                // Create a new list item for the selected ingredient
+                const listItem = document.createElement('li');
+        
+                // Create a text input for the user to enter the amount
+                const amountInput = document.createElement('input');
+                amountInput.type = 'number';
+                amountInput.name = `amount_${index}`;
+                amountInput.placeholder = 'Enter amount (ml)';
+                amountInput.required = true;
+                amountInput.min = "1";
+                amountInput.max = maxAmount;
+        
+                // Create a hidden input to store the ingredient index
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'selected_ingredients';
+                hiddenInput.value = index;
+        
+                // Create a hidden input for the amount entered by the user
+                const hiddenAmountInput = document.createElement('input');
+                hiddenAmountInput.type = 'hidden';
+                hiddenAmountInput.name = `amount_${index}_hidden`;
+                hiddenAmountInput.value = amountInput.value;
+        
+                // Add the name, input field, and hidden input to the list item
+                listItem.textContent = `${name} - `;
+                listItem.appendChild(amountInput);
+                listItem.appendChild(hiddenInput);
+                listItem.appendChild(hiddenAmountInput);
+        
+                // Add the list item to the selected ingredient list
+                document.getElementById('ingredient-list').appendChild(listItem);
+        
+                // Track the selected ingredients
+                selectedIngredients.push({ name, index, amountInput, hiddenAmountInput });
+        
+                // Update the hidden amount when the user enters a value
+                amountInput.addEventListener('input', function() {
+                    hiddenAmountInput.value = amountInput.value;
+                });
+            });
         });
+        
+        // For garnish selection (only one garnish at a time)
+        document.querySelectorAll('.garnish-clickable').forEach(item => {
+            item.addEventListener('click', function(event) {
+                event.preventDefault();
+        
+                const name = item.getAttribute('data-name');
+                const index = item.getAttribute('data-index');
+        
+                // If a garnish is already selected, remove the previous selection
+                if (selectedGarnish !== null) {
+                    selectedGarnish.classList.remove('selected');
+                    selectedGarnishInput.parentElement.remove();
+                }
+        
+                // Mark the new garnish as selected
+                selectedGarnish = item;
+                selectedGarnish.classList.add('selected');
+        
+                // Create a new hidden input for the selected garnish
+                selectedGarnishInput = document.createElement('input');
+                selectedGarnishInput.type = 'hidden';
+                selectedGarnishInput.name = 'selected_garnish';  // Only one selected garnish
+                selectedGarnishInput.value = index;
+        
+                // Add the hidden input to the form
+                const garnishList = document.getElementById('ingredient-list');
+                const garnishListItem = document.createElement('li');
+                garnishListItem.textContent = `${name} (Garnish)`;
+                garnishListItem.appendChild(selectedGarnishInput);
+                garnishList.appendChild(garnishListItem);
+            });
         });
-    });
+        
+        // Form validation before submitting
+        document.querySelector('form').addEventListener('submit', function(event) {
+            if (selectedIngredients.length === 0) {
+                alert('Please select at least one ingredient!');
+                event.preventDefault();  // Prevent form submission
+            } else if (selectedGarnish === null) {
+                alert('Please select a garnish!');
+                event.preventDefault();  // Prevent form submission
+            }
+        });
 </script>
+        
     
     
 </body>
