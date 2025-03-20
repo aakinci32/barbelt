@@ -4,7 +4,7 @@ INGREDIENT_PIN_MAPPING = {
     '2': 6,
     '3': 8,
     '4': 10,
-    '5': 12,
+    '5': 4,
 }
 
 #CHANGE THIS VALUE WITH EXPERIMENTATION
