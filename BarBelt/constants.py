@@ -1,10 +1,10 @@
 INGREDIENT_PIN_MAPPING = {
-    '0': 2,
-    '1': 4,
-    '2': 6,
+    '0': 8,
+    '1': 8,
+    '2': 8,
     '3': 8,
-    '4': 10,
-    '5': 4,
+    '4': 8,
+    '5': 8,
 }
 
 #CHANGE THIS VALUE WITH EXPERIMENTATION

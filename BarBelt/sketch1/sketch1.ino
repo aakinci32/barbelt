@@ -6,6 +6,7 @@
 const float stepsPerDegree = 1600.0 / 360.0;  // 4.44 steps per degree
 const int stepDelay = 2000;  // Adjust for speed (higher = slower)
 int currentAngle = 0;
+int garnishAngle;
 
 void setup() {
   Serial.begin(9600);  // Start serial communication
@@ -37,11 +38,11 @@ void loop() {
 
    
     if (command.startsWith("Garnish")){
-      Serial.println("Garnish command")
+      Serial.println("Garnish command");
       digitalWrite(LED_BUILTIN, HIGH);
       delay(5000);
       digitalWrite(LED_BUILTIN, LOW);
-      int garnishAngle = command.substring(8).toInt(); 
+      garnishAngle = command.substring(8).toInt(); 
       Serial.println("Garnish 2");
 
        // Extract the angle
@@ -51,28 +52,32 @@ void loop() {
       Serial.println("Garnish 3");
 
 
-      delay(5000);  // TODO: Fix this after we get the total time for the robot
+      // delay(2000);  // TODO: Fix this after we get the total time for the robot
       Serial.println("Garnish 4");
 
-      rotateByDegrees(garnishAngle, false); // Rotate wheel back to original position
       Serial.println("Garnish after");
 
 
     }
     else{
-      Serial.println("Ingredient command")
+      Serial.println("Ingredient command");
       String params = command.substring(11);
+      Serial.println(params);
       // Example format: pin_number,state,delay_time (e.g., "13,1,2" for HIGH on pin 13 for 2 seconds)
-      Serial.println("Before");
       int commaIndex1 = params.indexOf(',');
       int commaIndex2 = params.indexOf(',', commaIndex1 + 1);
-      Serial.println("After");
       if (commaIndex1 != -1 && commaIndex2 != -1) {
-        int pin = command.substring(0, commaIndex1).toInt();  // Extract pin number
-        Serial.print("pin");
+        Serial.print("Pin as string: ");
+        Serial.println(params.substring(0, commaIndex1));
+        int pin = params.substring(0, commaIndex1).toInt();  // Extract pin number
+        Serial.print("Pin: ");
         Serial.println(pin);
-        int state = command.substring(commaIndex1 + 1, commaIndex2).toInt();  // Extract state (1 or 0)
-        float delay_time = command.substring(commaIndex2 + 1).toFloat();  // Extract delay time (in seconds)
+        int state = params.substring(commaIndex1 + 1, commaIndex2).toInt();  // Extract state (1 or 0)
+        Serial.print("State: ");
+        Serial.println(state);
+        float delay_time = params.substring(commaIndex2 + 1).toFloat();  // Extract delay time (in seconds)
+        Serial.print("Delay_Time: ");
+        Serial.println(delay_time);
 
         pinMode(pin, OUTPUT);  // Set the pin mode to OUTPUT
         Serial.println("Hello world");
@@ -93,8 +98,12 @@ void loop() {
           Serial.print("Pin ");
           Serial.print(pin);
           Serial.println(" set to LOW (Valve Closed).");
+          // Rotate wheel back to original position
+          rotateByDegrees(garnishAngle, false);
         }
+
       }
+
     }
 
   }
