@@ -1,10 +1,10 @@
 INGREDIENT_PIN_MAPPING = {
-    '0': 8,
-    '1': 8,
-    '2': 8,
-    '3': 8,
+    '0': 4,
+    '1': 5,
+    '2': 6,
+    '3': 7,
     '4': 8,
-    '5': 8,
+    '5': 9,
 }
 
 #CHANGE THIS VALUE WITH EXPERIMENTATION
@@ -17,4 +17,6 @@ GARNISH_ANGLE_MAPPING = {
     '2':180,
     '3':270
 }
+
+ARDUINO_PORT = '/dev/cu.usbmodem1301'
 

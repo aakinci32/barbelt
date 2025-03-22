@@ -1,9 +1,10 @@
 import serial
 import time
 from .constants import ML_TO_SEC_RATIO
+from .constants import ARDUINO_PORT
 
 def callArduino(pins, garnishAngle):
-    arduino = serial.Serial('/dev/cu.usbmodem1401', 9600, timeout=1)  # Update with your correct serial port
+    arduino = serial.Serial(ARDUINO_PORT, 9600, timeout=1)  # Update with your correct serial port
     time.sleep(2)  # Give some time for the Arduino to reset
 
     command = f"Garnish {garnishAngle}\n"  # Sending garnish angle to Arduino for wheel rotation
