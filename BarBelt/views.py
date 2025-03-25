@@ -95,7 +95,7 @@ def facialRecognition(request):
 
     # Initialize the webcam
 
-    video_capture = cv2.VideoCapture(1,cv2.CAP_AVFOUNDATION)
+    video_capture = cv2.VideoCapture(1,cv2.CAP_AVFOUNDATION) # 0 FOR ARDA, 1 FOR ROHAN
     if not video_capture.isOpened():
         print("Error: Could not open webcam.")
         return
@@ -183,9 +183,7 @@ def processRequest(request):
         ingredient_names = list(Ingredient.objects.all().values_list('name', flat=True))
         garnish_names = list(Garnish.objects.all().values_list('name', flat=True))
         print(ingredient_names)
-        print("---")
         print(garnish_names)
-        print("000000")
 
         # Construct the prompt
         request_prompt = f"""
@@ -237,12 +235,9 @@ def processRequest(request):
 
 def submitCart(request):
     if request.method == 'POST':
-        print("submit")
-        print()
         selected_indices = request.POST.getlist('selected_ingredients')
         selected_garnish_list = request.POST.getlist('selected_garnish')
         selected_garnish_index = selected_garnish_list[0]
-        print("Selected Garnish Indices: ", selected_garnish_index)
 
         selected_amounts = {}
         
