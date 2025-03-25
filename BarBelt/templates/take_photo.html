@@ -5,54 +5,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Take Photo</title>
     <style>
-        /* Style for the camera view and capture button */
-        #camera {
-            width: 320px; /* Set a smaller width */
-            height: 240px; /* Set a smaller height */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            margin-top: 30px;
+            color: #333;
+        }
+
+        form {
+            margin: 30px auto;
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+        }
+
+        #camera, #photoPreview {
+            width: 100%;
+            max-width: 320px;
+            height: auto;
+            border-radius: 8px;
             border: 1px solid #ccc;
+            margin: 15px 0;
         }
-        #captureBtn {
-            margin-top: 10px;
+
+        .form-field {
+            margin-bottom: 20px;
         }
-        #photoPreview {
-            margin-top: 20px;
-            display: none;
-            width: 320px; /* Set a smaller width */
-            height: 240px; /* Set a smaller height */
-            border: 1px solid #ccc;
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
         }
+
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #f44336;
+            color: white;
+        }
+
         .buttons {
-            margin-top: 20px;
+            margin-top: 15px;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            width: 80%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
-    <h1>Please enter your name and take a photo</h1>
+    <h1>Enter Your Name & Take a Photo</h1>
 
-    <form method="post" action = "{% url 'savePhoto' %}" enctype="multipart/form-data">
+    <form method="post" action="{% url 'savePhoto' %}" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
 
-        <!-- Video element to display the webcam feed -->
+        <div class="form-field">
+            {{ form.as_p }}
+        </div>
+
+        <!-- Live Camera -->
         <video id="camera" autoplay></video>
 
         <!-- Capture Button -->
-        <button type="button" id="captureBtn">Take Photo</button>
+        <button type="button" id="captureBtn" class="btn btn-primary">Take Photo</button>
 
-        <!-- Hidden input field to store the captured photo -->
+        <!-- Hidden input to store the photo -->
         <input type="hidden" name="photo" id="photoInput">
 
-        <!-- Preview of the captured photo -->
-        <canvas id="photoPreview"></canvas>
+        <!-- Preview of captured photo -->
+        <canvas id="photoPreview" style="display: none;"></canvas>
 
-        <div id="photoButtons" class="buttons" style="display:none;">
-            <button type="button" id="retakeBtn">Retake</button>
-            <button type="submit">Submit</button>
+        <!-- Submit/Retake Buttons -->
+        <div id="photoButtons" class="buttons" style="display: none;">
+            <button type="button" id="retakeBtn" class="btn btn-secondary">Retake</button>
+            <button type="submit" class="btn btn-primary">Submit</button>
         </div>
     </form>
 
     <script>
-        // Accessing the webcam and setting up the video stream
         const video = document.getElementById('camera');
         const captureBtn = document.getElementById('captureBtn');
         const retakeBtn = document.getElementById('retakeBtn');
@@ -60,41 +108,38 @@
         const photoInput = document.getElementById('photoInput');
         const photoButtons = document.getElementById('photoButtons');
 
-        // Start video stream
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(function(stream) {
                 video.srcObject = stream;
             })
             .catch(function(error) {
-                console.log("Error accessing webcam: ", error);
+                console.error("Error accessing webcam:", error);
+                alert("Unable to access camera. Please check permissions.");
             });
 
-        // Function to capture the photo
         captureBtn.addEventListener('click', function() {
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
 
-            // Draw the current video frame onto the canvas
             const context = canvas.getContext('2d');
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            // Show the captured photo on the canvas
+            // Show photo in preview
             photoPreview.style.display = 'block';
             photoPreview.width = canvas.width;
             photoPreview.height = canvas.height;
             const ctx = photoPreview.getContext('2d');
             ctx.drawImage(canvas, 0, 0);
 
-            // Convert the photo to a base64 image string and set it in the hidden input field
+            // Save image data to hidden input
             const photoData = canvas.toDataURL('image/jpeg');
             photoInput.value = photoData;
 
-            // Show the Retake and Submit buttons
+            // Show buttons
             photoButtons.style.display = 'block';
         });
 
-        // Retake button event
         retakeBtn.addEventListener('click', function() {
             photoPreview.style.display = 'none';
             photoButtons.style.display = 'none';
