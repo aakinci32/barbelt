@@ -18,5 +18,7 @@ GARNISH_ANGLE_MAPPING = {
     '3':270
 }
 
-ARDUINO_PORT = '/dev/cu.usbmodem1301'
+ARDUINO_PORT = '/dev/cu.usbmodem11201'
+
+ARM_PORT = '/dev/cu.usbserial-0001'
 
