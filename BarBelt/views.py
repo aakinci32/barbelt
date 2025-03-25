@@ -162,29 +162,78 @@ def products(request):
     return render(request,'products.html')
 
 def suggestions(request):
-    return render(request,'suggest.html')
+    ingredients = Ingredient.objects.all()
+    garnishes = Garnish.objects.all()
+
+    ingredient_id_map = {i.name: str(i.id - 1) for i in ingredients} 
+    garnish_id_map = {g.name: str(g.id - 1) for g in garnishes}
+
+    return render(request, 'suggest.html', {
+        'ingredient_id_map': ingredient_id_map,
+        'garnish_id_map': garnish_id_map,
+    })
 
 def processRequest(request):
     if request.method == 'POST':
-        request_prompt = request.POST.get('request')
-        print(request_prompt)
-        response = client.chat.completions.create(model="gpt-3.5-turbo",  # You can also use "gpt-4" if you have access
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": request_prompt}
-            ],
-        temperature=0.7,
-        max_tokens=40)
-        response_data = response.choices[0].message.content
-        response_dict = {'response': response_data}
-        try:
-            
-            return JsonResponse(response_dict)
-        except:
-            print("error in json")
-            return JsonResponse({'error': 'Invalid JSON response', 'message': response_data}, status=500)
+        # Get selected ingredients and garnishes
+        selected_ingredients = request.POST.getlist('selected_ingredients')
+        selected_garnishes = request.POST.getlist('selected_garnish')
 
-    return JsonResponse({'error': 'Invalid JSON response', 'message': response_data}, status=500)
+        # Get the actual ingredient and garnish names from the DB
+        ingredient_names = list(Ingredient.objects.all().values_list('name', flat=True))
+        garnish_names = list(Garnish.objects.all().values_list('name', flat=True))
+        print(ingredient_names)
+        print("---")
+        print(garnish_names)
+        print("000000")
+
+        # Construct the prompt
+        request_prompt = f"""
+        Given the following available ingredients: {', '.join(ingredient_names)}.
+        And the following garnishes: {', '.join(garnish_names)}.
+        Come up with a creative drink recipe using some or all of these ingredients.
+
+        Respond in the following JSON format only (no extra explanation):
+
+        {{
+            "drink_name": "<name of drink>",
+            "recipe": [
+                {{"ingredient": "<ingredient name>", "amount_ml": <amount in mL>}},
+                ...
+            ],
+            "garnish": "<optional garnish if used>"
+        }}
+        """
+        try:
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a helpful bartender assistant. Return only valid JSON responses."},
+                    {"role": "user", "content": request_prompt}
+                ],
+                temperature=0.7,
+                max_tokens=300,
+            )
+            response_data = response.choices[0].message.content.strip()
+            
+            # Try to parse the response to JSON
+            try:
+                drink_json = json.loads(response_data)
+                print(response_data)
+                return JsonResponse(drink_json)
+            except json.JSONDecodeError as e:
+                print("Failed to decode JSON:", e)
+                return JsonResponse({
+                    'error': 'Invalid JSON from ChatGPT',
+                    'raw_response': response_data
+                }, status=500)
+
+        except Exception as e:
+            print("OpenAI API error:", e)
+            return JsonResponse({'error': 'Failed to contact ChatGPT'}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
 def submitCart(request):
     if request.method == 'POST':
