@@ -3,16 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Login with Camera</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background: linear-gradient(to right, #4CAF50, #2E7D32);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 36px;
+        }
+
+        .header p {
+            margin-top: 8px;
+            font-size: 16px;
+            font-weight: 300;
+        }
+
+        .login-container {
+            background-color: white;
+            padding: 40px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            margin: 40px auto;
+        }
+
+        h2 {
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        form {
+            margin-top: 15px;
+        }
+    </style>
 </head>
 <body>
 
-    <h2>Login with Camera</h2>
-    <!-- Login Button -->
-    <form method="POST" action="{% url 'facialRecognition' %}">
-        {% csrf_token %}
-        <button type="submit">Log In with Camera</button>
-    </form>
+    <!-- Header Section -->
+    <div class="header">
+        <h1>Welcome to BarBelt</h1>
+        <p>Your personalized smart bar assistant</p>
+    </div>
+
+    <!-- Login Box -->
+    <div class="login-container">
+        <h2>Login with Camera</h2>
+        <form method="POST" action="{% url 'facialRecognition' %}">
+            {% csrf_token %}
+            <button type="submit">Log In with Camera</button>
+        </form>
+    </div>
 
 </body>
 </html>

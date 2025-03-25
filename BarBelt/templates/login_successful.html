@@ -3,32 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Successful</title>
+    <title>Login Successful - BarBelt</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             margin: 0;
             padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
         }
+
         .navbar {
-            background-color: #333;
+            background-color: #2E7D32;
             overflow: hidden;
-            padding: 10px;
+            padding: 12px 20px;
         }
+
         .navbar a {
             float: left;
             display: block;
             color: white;
             text-align: center;
-            padding: 14px 20px;
+            padding: 12px 20px;
             text-decoration: none;
+            font-weight: bold;
         }
+
         .navbar a:hover {
-            background-color: #575757;
+            background-color: #1b5e20;
         }
+
         .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .welcome {
             text-align: center;
-            margin-top: 50px;
+            margin-bottom: 40px;
+        }
+
+        .welcome h1 {
+            color: #2E7D32;
+            font-size: 36px;
+        }
+
+        .welcome p {
+            font-size: 18px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #388E3C;
+            margin-bottom: 10px;
+        }
+
+        .section p {
+            line-height: 1.6;
+        }
+
+        ul.feature-list {
+            list-style-type: disc;
+            margin-left: 20px;
         }
     </style>
 </head>
@@ -42,8 +82,42 @@
     </div>
 
     <div class="container">
-        <h1>Login Successful!</h1>
-        <p>Welcome back, {{ name }}!</p>  <!-- Display the name -->
+        <div class="welcome">
+            <h1>Welcome back, {{ name }}!</h1>
+            <p>You’ve successfully logged into <strong>BarBelt</strong> — your smart, automated cocktail experience 🍸</p>
+        </div>
+
+        <div class="section">
+            <h2>What is BarBelt?</h2>
+            <p>
+                BarBelt is a state-of-the-art drink-mixing system that combines automation, robotics, and cloud computing to create perfect cocktails in under a minute.
+                From ingredient dispensing to garnish selection and mixing, everything is handled with precision and customization — just like a real bartender, but smarter and faster.
+            </p>
+        </div>
+
+        <div class="section">
+            <h2>How It Works</h2>
+            <p>
+                After logging in via facial recognition, you can use our intuitive WebApp to:
+            </p>
+            <ul class="feature-list">
+                <li><strong>Explore Your Ingredients</strong> via the <em>My Ingredients</em> page — see what you have in stock.</li>
+                <li><strong>Track Drink Usage</strong> with the <em>My Products</em> page — review what’s been made.</li>
+                <li><strong>Get Cocktail Recommendations</strong> from AI on the <em>Suggestions</em> page — based on your current inventory.</li>
+            </ul>
+            <p>
+                Once a drink is selected, our system opens solenoid valves to dispense the right amount of liquid, spins a magnetic stirrer to mix the drink,
+                and uses a robotic arm to garnish it — all in under 60 seconds.
+            </p>
+        </div>
+
+        <div class="section">
+            <h2>Why BarBelt?</h2>
+            <p>
+                Whether you're entertaining guests or just want a drink after a long day, BarBelt delivers a seamless and personalized bar experience.
+                With our cloud-powered backend and real-time hardware control, we ensure precision, speed, and fun with every pour.
+            </p>
+        </div>
     </div>
 
 </body>

@@ -3,67 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suggestions</title>
+    <title>Suggestions - BarBelt</title>
 
-    <!-- Add jQuery before your custom script -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>  <!-- jQuery CDN -->
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <style>
-        .navbar {
-            background-color: #333;
-            overflow: hidden;
-            padding: 10px;
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
         }
+
+        .navbar {
+            background-color: #2E7D32;
+            overflow: hidden;
+            padding: 12px 20px;
+        }
+
         .navbar a {
             float: left;
             display: block;
             color: white;
             text-align: center;
-            padding: 14px 20px;
+            padding: 12px 20px;
             text-decoration: none;
+            font-weight: bold;
         }
+
         .navbar a:hover {
-            background-color: #575757;
+            background-color: #1b5e20;
+        }
+
+        .header {
+            background: linear-gradient(to right, #4CAF50, #2E7D32);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 36px;
+        }
+
+        .header p {
+            margin-top: 8px;
+            font-size: 16px;
+            font-weight: 300;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 10px;
+            resize: vertical;
+        }
+
+        input[type="button"] {
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        input[type="button"]:hover {
+            background-color: #45a049;
+        }
+
+        #responseBox {
+            white-space: pre-wrap;
+            font-family: monospace;
+            margin-top: 25px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        #make-drink-btn {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #2E7D32;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        #make-drink-btn:hover {
+            background-color: #1b5e20;
+        }
+
+        h2, h3 {
+            color: #2E7D32;
         }
     </style>
 </head>
 
 <body>
+
     <div class="navbar">
-        <a href="#">Home</a>
-        <a href="{% url 'ingredients' %}">My Ingredients</a> 
+        <a href="{% url 'login_successful' %}">Home</a>
+        <a href="{% url 'ingredients' %}">My Ingredients</a>
         <a href="{% url 'products' %}">My Products</a>
         <a href="{% url 'suggestions' %}">Suggestions</a>
     </div>
-    <h2>Enter Your Request</h2>
-    <form action="" method="POST">
-        <label for="userInput">Your Request input:</label><br>
-        <textarea id="userInput" name="userInput" rows="5" cols="50" required></textarea><br><br>
-        <input type="button" value="Submit" onclick="submitRequest()">
-    </form>
-    <h3>Response</h3>
-    <textarea id="responseBox" rows="8" cols="50" readonly></textarea>
+
+    <div class="header">
+        <h1>BarBelt Drink Suggestions</h1>
+        <p>Let our AI bartender recommend the perfect cocktail based on your taste or available ingredients</p>
+    </div>
+
+    <div class="container">
+        <h2>Enter Your Request</h2>
+        <form action="" method="POST">
+            {% csrf_token %}
+            <label for="userInput">What kind of drink are you craving?</label>
+            <textarea id="userInput" name="userInput" rows="5" required></textarea><br>
+            <input type="button" value="Submit" onclick="submitRequest()">
+        </form>
+
+        <h3>AI Drink Suggestion</h3>
+        <div id="responseBox">Your suggested drink will appear here...</div>
+
+        <!-- Make Drink Button -->
+        <button id="make-drink-btn" onclick="makeDrink()">Make This Drink</button>
+    </div>
+
     <script>
-        function submitRequest(){
-            const request = document.getElementById('userInput').value;
+        let lastSuggestedDrink = null;
+
+        function submitRequest() {
+            const request = $('#userInput').val();
             $.ajax({
-                url: '{% url "submit_request" %}',  
+                url: '{% url "submit_request" %}',
                 method: 'POST',
                 data: {
                     'request': request,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}',  // CSRF token for security
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
                 success: function(response) {
-                    let aiResponse = response['response']
+                    if (response.error) {
+                        $('#responseBox').html(`<span style="color:red;">Error: ${response.error}</span><br>${response.raw_response}`);
+                        $('#make-drink-btn').hide();
+                        lastSuggestedDrink = null;
+                    } else {
+                        lastSuggestedDrink = response;
 
-                    document.getElementById("responseBox").innerHTML = ` ${aiResponse}` 
-         
+                        let html = `<strong>Drink Name:</strong> ${response.drink_name}<br><br>`;
+                        html += `<strong>Ingredients:</strong><ul>`;
+                        response.recipe.forEach(item => {
+                            html += `<li>${item.ingredient}: ${item.amount_ml} mL</li>`;
+                        });
+                        html += `</ul>`;
+                        html += `<strong>Garnish:</strong> ${response.garnish || 'None'}`;
+                        $('#responseBox').html(html);
+                        $('#make-drink-btn').show();
+                    }
                 },
                 error: function(xhr, status, error) {
-                    console.error("Error:", error);  // Log the error if the request fails
+                    $('#responseBox').html(`<span style="color:red;">An error occurred: ${error}</span>`);
+                    $('#make-drink-btn').hide();
+                    lastSuggestedDrink = null;
                 }
             });
         }
 
+        function makeDrink() {
+            if (!lastSuggestedDrink) {
+                alert("No drink to make!");
+                return;
+            }
 
+            const formData = new FormData();
+            const ingredientNameToId = {{ ingredient_id_map|safe }};
+            const garnishNameToId = {{ garnish_id_map|safe }};
+
+            lastSuggestedDrink.recipe.forEach(item => {
+                const id = ingredientNameToId[item.ingredient];
+                if (id !== undefined) {
+                    formData.append('selected_ingredients', id);
+                    formData.append(`amount_${id}_hidden`, item.amount_ml);
+                }
+            });
+
+            const garnishId = garnishNameToId[lastSuggestedDrink.garnish];
+            if (garnishId !== undefined) {
+                formData.append('selected_garnish', garnishId);
+            }
+
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+            fetch("{% url 'submit_cart' %}", {
+                method: 'POST',
+                body: formData
+            }).then(res => {
+                alert("Drink is being made!");
+                $('#make-drink-btn').hide();
+            }).catch(err => {
+                alert("Failed to make drink.");
+            });
+        }
     </script>
 </body>
+</html>
