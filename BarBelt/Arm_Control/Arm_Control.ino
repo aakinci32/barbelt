@@ -16,7 +16,12 @@ struct Pose {
 };
 
 // === Poses ===
-Pose start_pose = {0, 90, 90, 90};
+Pose start_pose = {0, 90, 90, 110};
+Pose wheel_ready = {0, 50, 150, 110};
+Pose wheel_grip = {0, 50, 150, 50};
+Pose cup_mid = {130, 90, 90, 50};
+Pose cup_ready = {130, 140, 70, 50};
+Pose cup_release = {130, 140, 70, 110};
 
 // Named poses (expandable)
 struct NamedPose {
@@ -26,12 +31,18 @@ struct NamedPose {
 
 NamedPose poses[] = {
   {"start_pose", start_pose},
+  {"wheel_ready", wheel_ready},
+  {"wheel_grip", wheel_grip},
+  {"cup_ready", cup_ready},
+  {"cup_release", cup_release},
+  {"cup_mid", cup_mid}
 };
 
 const int NUM_POSES = sizeof(poses) / sizeof(poses[0]);
 
 // === Sequences ===
 void runRangeCalib();  // forward declare
+void runGrabGarnish();
 
 struct Sequence {
   const char* name;
@@ -40,6 +51,7 @@ struct Sequence {
 
 Sequence sequences[] = {
   {"range_calib", runRangeCalib},
+  {"grab_garnish", runGrabGarnish}
 };
 
 const int NUM_SEQUENCES = sizeof(sequences) / sizeof(sequences[0]);
@@ -112,6 +124,7 @@ void loop() {
     for (int i = 0; i < NUM_POSES; i++) {
       Serial.println("- " + String(poses[i].name));
     }
+    Serial.println("Current Position: B"+String(base_angle)+" A"+String(arm_angle)+" E"+String(elbow_angle)+" G"+String(grip_angle));
   }
 
   delay(200);
@@ -143,7 +156,7 @@ void moveToPose(Pose targetPose) {
     elbow.write(elbow_angle);
     grip.write(grip_angle);
 
-    delay(30);
+    delay(50);
   }
 
   Serial.println("Pose reached.");
@@ -201,4 +214,16 @@ void runRangeCalib() {
   sweepServo(elbow, elbow_angle, "Elbow"); delay(500); moveToPose(start_pose); delay(500);
   sweepServo(grip, grip_angle, "Grip", 70, 150); delay(500); moveToPose(start_pose); delay(500);
   Serial.println("Calibration complete!");
+}
+
+void runGrabGarnish() {
+  Serial.println("Grabbing test Garnish");
+  moveToPose(wheel_ready); delay(300);
+  grip_angle = 50;
+  grip.write(grip_angle); delay(300);
+  moveToPose(cup_mid); delay(300);
+  moveToPose(cup_ready); delay(300);
+  moveToPose(cup_release); delay(300);
+  moveToPose(start_pose);
+  Serial.println("Garnish added!");
 }
