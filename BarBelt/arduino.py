@@ -13,13 +13,20 @@ def wait_for_arduino_response(arduino, expected="DONE"):
             if expected in response:
                 break
 
-def wait_for_wheel_response(arduino,expected="Wheel Done"):
-     while True:
-        if arduino.in_waiting > 0:
-            response = arduino.readline().decode().strip()
+def wait_for_wheel_response(arduino, expected="Wheel done"):
+    while True:
+        try:
+            response = arduino.readline().decode('utf-8', errors='ignore').strip()
             print(f"[Arduino] {response}")
-            if expected in response:
+            print(f"[Arduino repr] {repr(response)}")
+
+            if "wheel done" in response.lower():
+                print("✅ Found expected response.")
                 break
+            elif not response:
+                print("None")
+        except Exception as e:
+            print(f"[Serial Read Error] {e}")
 
 def wait_for_arm_response(arduino, expected="Garnish added!"):
     while True:
@@ -63,22 +70,16 @@ def callArduino(pins, garnishAngle):
         print(f"Sent to Arduino: {command}")  # Debug output
         time.sleep(2)  # Wait for the command to take effect
 
-        # Read and print output from Arduino
-        # while True:
-        #     if arduino.in_waiting > 0:
-        #         arduino_output = arduino.readline().decode().strip()
-        #         if arduino_output:
-        #             print(f"Arduino Output: {arduino_output}")
-        #               # Exit loop after receiving output
-
+        
         # Send the pin number and state as LOW (0), and include a placeholder for delay (e.g., 0)
         command = f"Ingredient {pin},0,0\n"   # Include a delay of 0 when turning the pin LOW
         arduino.write(command.encode())  # Send the command to Arduino
         print(f"Sent to Arduino: {command.strip()}")  # Debug output
         time.sleep(2)  # Wait for the command to take effect
     
-
+    print("before")
     wait_for_wheel_response(arduino,expected = 'Wheel Done')
+    print("after")
     command = f'grab_garnish\n'
     arduino2.write(command.encode())
     print(f"Sent to arm: {command.strip()}")
