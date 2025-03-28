@@ -4,7 +4,7 @@ INGREDIENT_PIN_MAPPING = {
     '2': 8,
     '3': 8,
     '4': 8,
-    '5': 8,
+    '5': 9,
 }
 
 #CHANGE THIS VALUE WITH EXPERIMENTATION
@@ -18,7 +18,7 @@ GARNISH_ANGLE_MAPPING = {
     '3':270
 }
 
-ARDUINO_PORT = '/dev/cu.usbmodem11401'
+ARDUINO_PORT = '/dev/cu.usbmodem1301'
 
 ARM_PORT = '/dev/cu.usbserial-0001'
 

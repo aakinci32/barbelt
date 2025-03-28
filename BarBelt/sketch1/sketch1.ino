@@ -33,65 +33,67 @@ void rotateByDegrees(int degrees, bool clockwise) {
 
 
 
+
 void loop() {
   if (Serial.available() > 0) {
-    String command = Serial.readStringUntil('\n');  // Read command from serial
+    String command = Serial.readStringUntil('\n');
     Serial.print("command: ");
     Serial.println(command);
 
-
+    // GARNISH COMMANDS
     if (command.startsWith("Garnish")) {
       if (command.equals("Garnish Finish")) {
         rotateByDegrees(garnishAngle, false);
         Serial.println("rotate back");
       } else {
         Serial.println("Garnish command");
-        garnishAngle = command.substring(8).toInt();
-
-        // Extract the angle
-        rotateByDegrees(garnishAngle, true);  // Rotate wheel forward x  degrees
-
+        garnishAngle = command.substring(8).toInt();  // Extract angle
+        rotateByDegrees(garnishAngle, true);         // Rotate forward
       }
       Serial.println("exit if statement");
-
     }
-    else {
-      Serial.println("Ingredient command");
-      String params = command.substring(11);
-      Serial.println(params);
-      // Example format: pin_number,state,delay_time (e.g., "13,1,2" for HIGH on pin 13 for 2 seconds)
-      int commaIndex1 = params.indexOf(',');
-      int commaIndex2 = params.indexOf(',', commaIndex1 + 1);
-      if (commaIndex1 != -1 && commaIndex2 != -1) {
-        int pin = params.substring(0, commaIndex1).toInt();  // Extract pin number
-        int state = params.substring(commaIndex1 + 1, commaIndex2).toInt();  // Extract state (1 or 0)
-        float delay_time = params.substring(commaIndex2 + 1).toFloat();  // Extract delay time (in seconds)
-        Serial.print("Pin:");
-        Serial.println(pin);
-        Serial.print("state:");
-        Serial.println(state);
-        Serial.print("Delay:");
-        Serial.println(delay_time);
 
-        pinMode(pin, OUTPUT);  // Set the pin mode to OUTPUT
-
-        if (state == 1) {
-          digitalWrite(pin, HIGH);  // Open valve
-          Serial.println(" set to HIGH (Valve Open).");
-          delay(delay_time * 1000);  // Wait for the specified delay time (convert seconds to milliseconds)
-          Serial.println("Ingredient Poured");
+    // START POUR MULTIPLE PINS
+    else if (command.startsWith("StartPour ")) {
+      String pins_str = command.substring(10);  // Get "5,6,9"
+      while (pins_str.length() > 0) {
+        int commaIndex = pins_str.indexOf(',');
+        String pinStr;
+        if (commaIndex == -1) {
+          pinStr = pins_str;
+          pins_str = "";
         } else {
-          Serial.println("set pin to low");
-          digitalWrite(pin, LOW);  // Close valve
-          Serial.println("Ingredient Finished");
+          pinStr = pins_str.substring(0, commaIndex);
+          pins_str = pins_str.substring(commaIndex + 1);
         }
 
+        int pin = pinStr.toInt();
+        pinMode(pin, OUTPUT);
+        digitalWrite(pin, HIGH);
+        Serial.println("Ingredient Poured " + String(pin));
       }
-
-      
-
     }
 
-  }
+    // LOW COMMAND FOR INDIVIDUAL PIN
+    else if (command.startsWith("Ingredient ")) {
+      String params = command.substring(11);  // Strip "Ingredient "
+      Serial.println(params);
 
+      int commaIndex1 = params.indexOf(',');
+      int commaIndex2 = params.indexOf(',', commaIndex1 + 1);
+
+      if (commaIndex1 != -1 && commaIndex2 != -1) {
+        int pin = params.substring(0, commaIndex1).toInt();
+        int state = params.substring(commaIndex1 + 1, commaIndex2).toInt();
+
+        pinMode(pin, OUTPUT);  // Ensure pin is ready
+
+        if (state == 0) {
+          digitalWrite(pin, LOW);
+          Serial.println("set pin to low");
+          Serial.println("Ingredient Finished " + String(pin));
+        }
+      }
+    }
+  }
 }
