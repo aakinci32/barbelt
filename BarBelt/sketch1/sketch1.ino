@@ -13,7 +13,6 @@ void setup() {
   pinMode(stepPin, OUTPUT);
   pinMode(dirPin, OUTPUT);
   delay(2000);  // Wait 2 seconds for the serial connection to establish
-  Serial.println("in setup");
 }
 void rotateByDegrees(int degrees, bool clockwise) {
   int steps = degrees * stepsPerDegree;
@@ -28,9 +27,8 @@ void rotateByDegrees(int degrees, bool clockwise) {
 
   currentAngle += (clockwise ? degrees : -degrees);
   if (clockwise) {
-    Serial.println("Wheel Done");
+    Serial.println("Wheel done");
   }
-
 }
 
 
@@ -38,11 +36,14 @@ void rotateByDegrees(int degrees, bool clockwise) {
 void loop() {
   if (Serial.available() > 0) {
     String command = Serial.readStringUntil('\n');  // Read command from serial
+    Serial.print("command: ");
+    Serial.println(command);
 
 
     if (command.startsWith("Garnish")) {
       if (command.equals("Garnish Finish")) {
         rotateByDegrees(garnishAngle, false);
+        Serial.println("rotate back");
       } else {
         Serial.println("Garnish command");
         garnishAngle = command.substring(8).toInt();
@@ -51,6 +52,7 @@ void loop() {
         rotateByDegrees(garnishAngle, true);  // Rotate wheel forward x  degrees
 
       }
+      Serial.println("exit if statement");
 
     }
     else {
@@ -64,29 +66,32 @@ void loop() {
         int pin = params.substring(0, commaIndex1).toInt();  // Extract pin number
         int state = params.substring(commaIndex1 + 1, commaIndex2).toInt();  // Extract state (1 or 0)
         float delay_time = params.substring(commaIndex2 + 1).toFloat();  // Extract delay time (in seconds)
+        Serial.print("Pin:");
+        Serial.println(pin);
+        Serial.print("state:");
+        Serial.println(state);
+        Serial.print("Delay:");
+        Serial.println(delay_time);
 
         pinMode(pin, OUTPUT);  // Set the pin mode to OUTPUT
 
-
         if (state == 1) {
           digitalWrite(pin, HIGH);  // Open valve
-
           Serial.println(" set to HIGH (Valve Open).");
-
-
           delay(delay_time * 1000);  // Wait for the specified delay time (convert seconds to milliseconds)
-
+          Serial.println("Ingredient Poured");
         } else {
           Serial.println("set pin to low");
           digitalWrite(pin, LOW);  // Close valve
+          Serial.println("Ingredient Finished");
         }
 
       }
+
+      
 
     }
 
   }
 
 }
-
-
