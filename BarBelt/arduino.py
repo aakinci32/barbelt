@@ -10,7 +10,8 @@ def wait_for_arduino_response(arduino, expected="DONE"):
     while True:
         if arduino.in_waiting > 0:
             response = arduino.readline().decode().strip()
-            print(f"[Arduino] {response}")
+            if len(response) > 0:
+                print(f"[Arduino] {response}")
             if expected in response:
                 break
 
@@ -26,8 +27,9 @@ def wait_for_wheel_response(arduino, expected="Wheel done"):
     while True:
         try:
             response = arduino.readline().decode('utf-8', errors='ignore').strip()
-            print(f"[Arduino] {response}")
-            print(f"[Arduino repr] {repr(response)}")
+            if len(response) > 0:
+                print(f"[Arduino] {response}")
+                print(f"[Arduino repr] {repr(response)}")
 
             if "wheel done" in response.lower():
                 print("✅ Found expected response.")
@@ -44,8 +46,9 @@ def wait_for_ingredient_responses(arduino, expected_prefix="Ingredient Finished"
     while len(finished_pins) < count:
         try:
             response = arduino.readline().decode('utf-8', errors='ignore').strip()
-            print(f"[Arduino] {response}")
-            print(f"[Arduino repr] {repr(response)}")
+            if len(response) > 0:
+                print(f"[Arduino] {response}")
+                print(f"[Arduino repr] {repr(response)}")
 
             if response.lower().startswith(expected_prefix.lower()):
                 parts = response.split()
