@@ -3,6 +3,7 @@ import time
 from .constants import ML_TO_SEC_RATIO
 from .constants import ARDUINO_PORT
 from .constants import ARM_PORT
+import threading
 
 
 def wait_for_arduino_response(arduino, expected="DONE"):
@@ -12,6 +13,14 @@ def wait_for_arduino_response(arduino, expected="DONE"):
             print(f"[Arduino] {response}")
             if expected in response:
                 break
+
+def stop_pin_after_delay(arduino,pin, delay_sec):
+    time.sleep(delay_sec)
+    stop_command = f"Ingredient {pin},0,0\n"
+    arduino.write(stop_command.encode())
+    print(f"🔽 Sent LOW for pin {pin}")
+
+
 
 def wait_for_wheel_response(arduino, expected="Wheel done"):
     while True:
@@ -26,33 +35,29 @@ def wait_for_wheel_response(arduino, expected="Wheel done"):
         except Exception as e:
             print(f"[Serial Read Error] {e}")
 
-def wait_for_pour_response(arduino, expected="Ingredient Poured"):
-    while True:
+# 
+
+
+def wait_for_ingredient_responses(arduino, expected_prefix="Ingredient Finished", count=1):
+    finished_pins = set()
+
+    while len(finished_pins) < count:
         try:
             response = arduino.readline().decode('utf-8', errors='ignore').strip()
             print(f"[Arduino] {response}")
             print(f"[Arduino repr] {repr(response)}")
 
-            if "ingredient poured" in response.lower():
-                print("✅ Found expected response.")
-                break
-            
+            if response.lower().startswith(expected_prefix.lower()):
+                parts = response.split()
+                if len(parts) == 3:
+                    pin = parts[2]
+                    if pin not in finished_pins:
+                        finished_pins.add(pin)
+                        print(f"✅ Ingredient finished for pin {pin}. ({len(finished_pins)}/{count})")
+
         except Exception as e:
             print(f"[Serial Read Error] {e}")
 
-def wait_for_ingredient_response(arduino, expected="Ingredient Finished"):
-    while True:
-        try:
-            response = arduino.readline().decode('utf-8', errors='ignore').strip()
-            print(f"[Arduino] {response}")
-            print(f"[Arduino repr] {repr(response)}")
-
-            if "ingredient finished" in response.lower():
-                print("✅ Found expected response.")
-                break
-            
-        except Exception as e:
-            print(f"[Serial Read Error] {e}")
 
 def wait_for_arm_response(arduino, expected="Garnish added!"):
     while True:
@@ -71,31 +76,30 @@ def wait_for_arm_response(arduino, expected="Garnish added!"):
 
 def callArduino(pins, garnishAngle):
     arduino = serial.Serial(ARDUINO_PORT, 9600, timeout=1)  # Update with your correct serial port
-    arduino2 = serial.Serial(ARM_PORT,9600,timeout = 1)
-    arduino2.setDTR(False)
-    arduino2.setRTS(False)
+    # arduino2 = serial.Serial(ARM_PORT,9600,timeout = 1)
+    # arduino2.setDTR(False)
+    # arduino2.setRTS(False)
     time.sleep(2)  # Give some time for the Arduino to reset
 
     
 
     
-    for pin, amount in pins.items():  # Iterate over the dictionary of pins and amounts
-        delayAmount = amount / ML_TO_SEC_RATIO  # Calculate the delay based on amount in mL
+    pin_list = list(pins.keys())
+    pin_string = ",".join(str(pin) for pin in pin_list)
+    command = f"StartPour {pin_string}\n"
+    arduino.write(command.encode())
+    print(f"🔼 Sent to Arduino: {command.strip()}")
 
-        # Send the pin number, state (HIGH), and delay time (in seconds)
-        command = f"Ingredient {pin},1,{delayAmount}\n"  # Include the delayAmount in the command
-        arduino.write(command.encode())  # Send command to Arduino
-        print(f"Sent to Arduino: {command}")  # Debug output
-        time.sleep(2)  # Wait for the command to take effect
 
-        wait_for_pour_response(arduino,expected = 'Ingredient Poured')
-        # Send the pin number and state as LOW (0), and include a placeholder for delay (e.g., 0)
-        command = f"Ingredient {pin},0,0\n"   # Include a delay of 0 when turning the pin LOW
-        arduino.write(command.encode())  # Send the command to Arduino
-        print(f"Sent to Arduino: {command.strip()}")  # Debug output
-        time.sleep(2)  # Wait for the command to take effect
+    # wait_for_all_pour_responses(arduino,expected_prefix = 'Ingredient Poured',pins_expected=pins.keys())
+
+
+    for pin, amount in pins.items():
+        delay_sec = amount / ML_TO_SEC_RATIO
+        threading.Thread(target=stop_pin_after_delay, args=(arduino,pin, delay_sec)).start()
+            # Send the pin number and state as LOW (0), and include a placeholder for delay (e.g., 0)
     
-    wait_for_ingredient_response(arduino,expected = "Ingredient Finished")
+    wait_for_ingredient_responses(arduino,expected_prefix = "Ingredient Finished",count = len(pins))
 
     command = f"Garnish {garnishAngle}\n"  # Sending garnish angle to Arduino for wheel rotation
     arduino.write(command.encode())  # Send command to Arduino
@@ -104,12 +108,12 @@ def callArduino(pins, garnishAngle):
     wait_for_wheel_response(arduino,expected = 'Wheel Done')
     print("after")
 
-    command = f'grab_garnish\n'
-    arduino2.write(command.encode())
-    print(f"Sent to arm: {command.strip()}")
+    # command = f'grab_garnish\n'
+    # arduino2.write(command.encode())
+    # print(f"Sent to arm: {command.strip()}")
 
     
-    wait_for_arm_response(arduino2,expected = "Garnish added!")
+    # wait_for_arm_response(arduino2,expected = "Garnish added!")
 
     command = f"Garnish Finish\n"  # Sending garnish angle to Arduino for wheel rotation
     arduino.write(command.encode())  # Send command to Arduino
@@ -118,4 +122,4 @@ def callArduino(pins, garnishAngle):
 
 
     arduino.close()
-    arduino2.close()
+    # arduino2.close()

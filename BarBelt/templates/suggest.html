@@ -1,13 +1,11 @@
+<!-- suggest.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Suggestions - BarBelt</title>
-
-    <!-- jQuery CDN -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, sans-serif;
@@ -16,13 +14,11 @@
             background-color: #f9f9f9;
             color: #333;
         }
-
         .navbar {
             background-color: #2E7D32;
             overflow: hidden;
             padding: 12px 20px;
         }
-
         .navbar a {
             float: left;
             display: block;
@@ -32,35 +28,29 @@
             text-decoration: none;
             font-weight: bold;
         }
-
         .navbar a:hover {
             background-color: #1b5e20;
         }
-
         .header {
             background: linear-gradient(to right, #4CAF50, #2E7D32);
             color: white;
             padding: 30px 20px;
             text-align: center;
         }
-
         .header h1 {
             margin: 0;
             font-size: 36px;
         }
-
         .header p {
             margin-top: 8px;
             font-size: 16px;
             font-weight: 300;
         }
-
         .container {
             max-width: 800px;
             margin: 40px auto;
             padding: 0 20px;
         }
-
         textarea {
             width: 100%;
             padding: 10px;
@@ -68,8 +58,7 @@
             margin-top: 10px;
             resize: vertical;
         }
-
-        input[type="button"] {
+        input[type="button"], button {
             margin-top: 15px;
             padding: 10px 20px;
             font-size: 16px;
@@ -79,11 +68,9 @@
             border-radius: 5px;
             cursor: pointer;
         }
-
-        input[type="button"]:hover {
+        input[type="button"]:hover, button:hover {
             background-color: #45a049;
         }
-
         #responseBox {
             white-space: pre-wrap;
             font-family: monospace;
@@ -93,61 +80,69 @@
             padding: 20px;
             border-radius: 8px;
         }
-
         #make-drink-btn {
             display: none;
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
             background-color: #2E7D32;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
         }
-
-        #make-drink-btn:hover {
-            background-color: #1b5e20;
-        }
-
         h2, h3 {
             color: #2E7D32;
         }
     </style>
 </head>
-
-<body>
-
+<body onload="speakText('What kind of drink would you like?')">
     <div class="navbar">
         <a href="{% url 'login_successful' %}">Home</a>
         <a href="{% url 'ingredients' %}">My Ingredients</a>
         <a href="{% url 'products' %}">My Products</a>
         <a href="{% url 'suggestions' %}">Suggestions</a>
     </div>
-
     <div class="header">
         <h1>BarBelt Drink Suggestions</h1>
         <p>Let our AI bartender recommend the perfect cocktail based on your taste or available ingredients</p>
     </div>
-
     <div class="container">
-        <h2>Enter Your Request</h2>
-        <form action="" method="POST">
-            {% csrf_token %}
-            <label for="userInput">What kind of drink are you craving?</label>
-            <textarea id="userInput" name="userInput" rows="5" required></textarea><br>
-            <input type="button" value="Submit" onclick="submitRequest()">
-        </form>
-
+        <h2>Talk to BarBelt</h2>
+        <p><em>Click the button and speak your drink request...</em></p>
+        <button id="start-voice-btn">🎤 Start Talking</button>
+        <textarea id="userInput" name="userInput" rows="5" placeholder="Your spoken prompt will appear here..." required></textarea><br>
+        <input type="button" value="Submit" onclick="submitRequest()">
         <h3>AI Drink Suggestion</h3>
         <div id="responseBox">Your suggested drink will appear here...</div>
-
-        <!-- Make Drink Button -->
         <button id="make-drink-btn" onclick="makeDrink()">Make This Drink</button>
     </div>
-
     <script>
         let lastSuggestedDrink = null;
+
+        const startVoiceBtn = document.getElementById('start-voice-btn');
+        const userInput = document.getElementById('userInput');
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+
+        recognition.continuous = false;
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        startVoiceBtn.addEventListener('click', () => {
+            userInput.value = '';
+            recognition.start();
+        });
+
+        recognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript;
+            userInput.value = transcript;
+
+            if (transcript.toLowerCase().includes("make it")) {
+                speakText("I will do it right now.");
+                makeDrink();
+            } else {
+                submitRequest();
+            }
+        };
+
+        recognition.onerror = function(event) {
+            alert("Speech recognition error: " + event.error);
+        };
 
         function submitRequest() {
             const request = $('#userInput').val();
@@ -165,7 +160,6 @@
                         lastSuggestedDrink = null;
                     } else {
                         lastSuggestedDrink = response;
-
                         let html = `<strong>Drink Name:</strong> ${response.drink_name}<br><br>`;
                         html += `<strong>Ingredients:</strong><ul>`;
                         response.recipe.forEach(item => {
@@ -174,7 +168,8 @@
                         html += `</ul>`;
                         html += `<strong>Garnish:</strong> ${response.garnish || 'None'}`;
                         $('#responseBox').html(html);
-                        $('#make-drink-btn').show();
+                        $('#make-drink-btn').style = 'display:inline-block;';
+                        speakText(`Your drink is called ${response.drink_name}. Would you like me to make it or would you like a different one?`);
                     }
                 },
                 error: function(xhr, status, error) {
@@ -184,6 +179,14 @@
                 }
             });
         }
+
+        function speakText(text) {
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance(text);
+            synth.speak(utterance);
+        }
+
+
 
         function makeDrink() {
             if (!lastSuggestedDrink) {
