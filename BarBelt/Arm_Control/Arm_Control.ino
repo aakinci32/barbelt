@@ -139,28 +139,49 @@ void moveToPose(Pose targetPose) {
   while (!reached) {
     reached = true;
 
-    if (base_angle < targetPose.base) { base_angle += stepSize; reached = false; }
-    else if (base_angle > targetPose.base) { base_angle -= stepSize; reached = false; }
+    // Base
+    if (abs(base_angle - targetPose.base) > stepSize) {
+      base_angle += (base_angle < targetPose.base) ? stepSize : -stepSize;
+      reached = false;
+    } else {
+      base_angle = targetPose.base;
+    }
 
-    if (arm_angle < targetPose.arm) { arm_angle += stepSize; reached = false; }
-    else if (arm_angle > targetPose.arm) { arm_angle -= stepSize; reached = false; }
+    // Arm
+    if (abs(arm_angle - targetPose.arm) > stepSize) {
+      arm_angle += (arm_angle < targetPose.arm) ? stepSize : -stepSize;
+      reached = false;
+    } else {
+      arm_angle = targetPose.arm;
+    }
 
-    if (elbow_angle < targetPose.elbow) { elbow_angle += stepSize; reached = false; }
-    else if (elbow_angle > targetPose.elbow) { elbow_angle -= stepSize; reached = false; }
+    // Elbow
+    if (abs(elbow_angle - targetPose.elbow) > stepSize) {
+      elbow_angle += (elbow_angle < targetPose.elbow) ? stepSize : -stepSize;
+      reached = false;
+    } else {
+      elbow_angle = targetPose.elbow;
+    }
 
-    if (grip_angle < targetPose.grip) { grip_angle += stepSize; reached = false; }
-    else if (grip_angle > targetPose.grip) { grip_angle -= stepSize; reached = false; }
+    // Grip
+    if (abs(grip_angle - targetPose.grip) > stepSize) {
+      grip_angle += (grip_angle < targetPose.grip) ? stepSize : -stepSize;
+      reached = false;
+    } else {
+      grip_angle = targetPose.grip;
+    }
 
     base.write(base_angle);
     arm.write(arm_angle);
     elbow.write(elbow_angle);
     grip.write(grip_angle);
 
-    delay(50);
+    delay(30);
   }
 
   Serial.println("Pose reached.");
 }
+
 
 // === Manual Input Handler (e.g., "B90 A120") ===
 void processManualCommands(String input) {
@@ -213,6 +234,7 @@ void runRangeCalib() {
   sweepServo(arm, arm_angle, "Arm"); delay(500); moveToPose(start_pose); delay(500);
   sweepServo(elbow, elbow_angle, "Elbow"); delay(500); moveToPose(start_pose); delay(500);
   sweepServo(grip, grip_angle, "Grip", 70, 150); delay(500); moveToPose(start_pose); delay(500);
+  hardReturn();
   Serial.println("Calibration complete!");
 }
 
@@ -224,6 +246,18 @@ void runGrabGarnish() {
   moveToPose(cup_mid); delay(300);
   moveToPose(cup_ready); delay(300);
   moveToPose(cup_release); delay(300);
-  moveToPose(start_pose);
+  moveToPose(start_pose); delay(100);
+  hardReturn();
   Serial.println("Garnish added!");
+}
+
+void hardReturn() {
+  base_angle = 0;
+  base.write(base_angle);
+  arm_angle = 90;
+  arm.write(arm_angle);
+  elbow_angle = 90;
+  elbow.write(elbow_angle);
+  grip_angle = 110;
+  grip.write(grip_angle);
 }
