@@ -108,6 +108,11 @@
         <input type="button" value="Submit" onclick="submitRequest()">
         <h3>AI Drink Suggestion</h3>
         <div id="responseBox">Your suggested drink will appear here...</div>
+        <form id="suggestion-form" method="POST" action="{% url 'submit_cart' %}">
+            {% csrf_token %}
+            <input type="hidden" id="suggested-ingredients" name="selected_ingredients">
+            <input type="hidden" id="suggested-garnish" name="selected_garnish">
+        </form>
         <button id="make-drink-btn" onclick="makeDrink()">Make This Drink</button>
     </div>
     <script>
@@ -168,7 +173,7 @@
                         html += `</ul>`;
                         html += `<strong>Garnish:</strong> ${response.garnish || 'None'}`;
                         $('#responseBox').html(html);
-                        $('#make-drink-btn').style = 'display:inline-block;';
+                        $('#make-drink-btn').show();
                         speakText(`Your drink is called ${response.drink_name}. Would you like me to make it or would you like a different one?`);
                     }
                 },
@@ -186,42 +191,43 @@
             synth.speak(utterance);
         }
 
-
-
         function makeDrink() {
             if (!lastSuggestedDrink) {
                 alert("No drink to make!");
                 return;
             }
 
-            const formData = new FormData();
+            const form = document.getElementById('suggestion-form');
+            form.innerHTML = '';
+
+            const csrfToken = '{{ csrf_token }}';
+
             const ingredientNameToId = {{ ingredient_id_map|safe }};
             const garnishNameToId = {{ garnish_id_map|safe }};
 
             lastSuggestedDrink.recipe.forEach(item => {
                 const id = ingredientNameToId[item.ingredient];
                 if (id !== undefined) {
-                    formData.append('selected_ingredients', id);
-                    formData.append(`amount_${id}_hidden`, item.amount_ml);
+                    form.appendChild(createHiddenInput('selected_ingredients', id));
+                    form.appendChild(createHiddenInput(`amount_${id}_hidden`, item.amount_ml));
                 }
             });
 
             const garnishId = garnishNameToId[lastSuggestedDrink.garnish];
             if (garnishId !== undefined) {
-                formData.append('selected_garnish', garnishId);
+                form.appendChild(createHiddenInput('selected_garnish', garnishId));
             }
 
-            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+            form.appendChild(createHiddenInput('csrfmiddlewaretoken', csrfToken));
+            form.submit();
+        }
 
-            fetch("{% url 'submit_cart' %}", {
-                method: 'POST',
-                body: formData
-            }).then(res => {
-                alert("Drink is being made!");
-                $('#make-drink-btn').hide();
-            }).catch(err => {
-                alert("Failed to make drink.");
-            });
+        function createHiddenInput(name, value) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            return input;
         }
     </script>
 </body>
