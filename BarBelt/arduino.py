@@ -36,8 +36,8 @@ def wait_for_wheel_response(arduino, expected="Wheel done"):
                 break
         except Exception as e:
             print(f"[Serial Read Error] {e}")
-            
-def wait_for_stir_response(arduino, expected="Stirring Complete"):
+
+def wait_for_stir_response(arduino, expected="Stirring Finished"):
     while True:
         try:
             response = arduino.readline().decode('utf-8', errors='ignore').strip()
@@ -45,13 +45,11 @@ def wait_for_stir_response(arduino, expected="Stirring Complete"):
                 print(f"[Arduino] {response}")
                 print(f"[Arduino repr] {repr(response)}")
 
-            if "stirring complete" in response.lower():
+            if "stirring finished" in response.lower():
                 print("✅ Found expected response.")
                 break
         except Exception as e:
             print(f"[Serial Read Error] {e}")
-
-# 
 
 
 def wait_for_ingredient_responses(arduino, expected_prefix="Ingredient Finished", count=1):
@@ -93,9 +91,9 @@ def wait_for_arm_response(arduino, expected="Garnish added!"):
 
 def callArduino(pins, garnishAngle):
     arduino = serial.Serial(ARDUINO_PORT, 9600, timeout=1)  # Update with your correct serial port
-    # arduino2 = serial.Serial(ARM_PORT,9600,timeout = 1)
-    # arduino2.setDTR(False)
-    # arduino2.setRTS(False)
+    arduino2 = serial.Serial(ARM_PORT,9600,timeout = 1)
+    arduino2.setDTR(False)
+    arduino2.setRTS(False)
     time.sleep(2)  # Give some time for the Arduino to reset
 
     
@@ -118,11 +116,11 @@ def callArduino(pins, garnishAngle):
     
     wait_for_ingredient_responses(arduino,expected_prefix = "Ingredient Finished",count = len(pins))
 
-    command = f"Stir Start\n"
+    command = f"Stir Begin\n"  # Sending garnish angle to Arduino for wheel rotation
     arduino.write(command.encode())  # Send command to Arduino
     print(f"Sent to Arduino: {command}")
+    wait_for_stir_response(arduino,expected = 'Stirring Finished')
     
-    wait_for_stir_response(arduino,expected_prefix = "Stirring Complete")
 
     command = f"Garnish {garnishAngle}\n"  # Sending garnish angle to Arduino for wheel rotation
     arduino.write(command.encode())  # Send command to Arduino
@@ -131,18 +129,19 @@ def callArduino(pins, garnishAngle):
     wait_for_wheel_response(arduino,expected = 'Wheel Done')
     print("after")
 
-    # command = f'grab_garnish\n'
-    # arduino2.write(command.encode())
-    # print(f"Sent to arm: {command.strip()}")
+    command = f'grab_garnish\n'
+    arduino2.write(command.encode())
+    print(f"Sent to arm: {command.strip()}")
 
     
-    # wait_for_arm_response(arduino2,expected = "Garnish added!")
+    wait_for_arm_response(arduino2,expected = "Garnish added!")
 
     command = f"Garnish Finish\n"  # Sending garnish angle to Arduino for wheel rotation
     arduino.write(command.encode())  # Send command to Arduino
     print(f"Sent to Arduino: {command}")
-
+    
+    wait_for_wheel_response(arduino,expected = 'Wheel Done')
 
 
     arduino.close()
-    # arduino2.close()
+    arduino2.close()
