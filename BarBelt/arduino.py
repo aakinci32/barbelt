@@ -36,6 +36,20 @@ def wait_for_wheel_response(arduino, expected="Wheel done"):
                 break
         except Exception as e:
             print(f"[Serial Read Error] {e}")
+            
+def wait_for_stir_response(arduino, expected="Stirring Complete"):
+    while True:
+        try:
+            response = arduino.readline().decode('utf-8', errors='ignore').strip()
+            if len(response) > 0:
+                print(f"[Arduino] {response}")
+                print(f"[Arduino repr] {repr(response)}")
+
+            if "stirring complete" in response.lower():
+                print("✅ Found expected response.")
+                break
+        except Exception as e:
+            print(f"[Serial Read Error] {e}")
 
 # 
 
@@ -103,6 +117,12 @@ def callArduino(pins, garnishAngle):
             # Send the pin number and state as LOW (0), and include a placeholder for delay (e.g., 0)
     
     wait_for_ingredient_responses(arduino,expected_prefix = "Ingredient Finished",count = len(pins))
+
+    command = f"Stir Start\n"
+    arduino.write(command.encode())  # Send command to Arduino
+    print(f"Sent to Arduino: {command}")
+    
+    wait_for_stir_response(arduino,expected_prefix = "Stirring Complete")
 
     command = f"Garnish {garnishAngle}\n"  # Sending garnish angle to Arduino for wheel rotation
     arduino.write(command.encode())  # Send command to Arduino

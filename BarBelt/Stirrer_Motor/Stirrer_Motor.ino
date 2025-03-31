@@ -1,5 +1,5 @@
-const int MotorIn3 = 5;  // IN3 on L298N → D5 on Uno
-const int MotorIn4 = 4;  // IN4 on L298N → D4 on Uno
+#define MotorIn3 5  // IN3 on L298N → D5 on Uno
+#define MotorIn4 4  // IN4 on L298N → D4 on Uno
 
 void setup() {
   pinMode(MotorIn3, OUTPUT);
@@ -16,20 +16,22 @@ void loop() {
 
     if (input == "on") {
 
-      Serial.println("Demo starting in 5 seconds... Get ready!");
-      delay(5000);
+      Serial.println("Demo starting in 2 seconds... Get ready!");
+      delay(2000);
 
       // Start motor
       digitalWrite(MotorIn4, LOW);
-      analogWrite(MotorIn3, 70);  // Low speed
-      Serial.println("Motor running...");
+      analogWrite(MotorIn3, 90);
+      Serial.println("Spinning...");
 
-      delay(7000);  // Run for 7 seconds
+      delay(6500);
 
       // Stop motor
       digitalWrite(MotorIn3, LOW);
       digitalWrite(MotorIn4, LOW);
-      Serial.println("Motor stopped. Demo complete.");
+      delay(2000);
+
+      Serial.println("Stirring Finished");
     } 
     else {
       Serial.println("Type 'on' to start the demo.");

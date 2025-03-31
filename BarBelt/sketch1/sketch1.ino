@@ -3,6 +3,9 @@
 #define dirPin 2
 #define stepPin 3
 
+#define MotorIn3 5  // IN3 on L298N → D5 on Uno
+#define MotorIn4 4  // IN4 on L298N → D4 on Uno
+
 const float stepsPerDegree = 1600.0 / 360.0;  // 4.44 steps per degree
 const int stepDelay = 2000;  // Adjust for speed (higher = slower)
 int currentAngle = 0;
@@ -12,6 +15,8 @@ void setup() {
   Serial.begin(9600);  // Start serial communication
   pinMode(stepPin, OUTPUT);
   pinMode(dirPin, OUTPUT);
+  pinMode(MotorIn3, OUTPUT);
+  pinMode(MotorIn4, OUTPUT);
   delay(2000);  // Wait 2 seconds for the serial connection to establish
 }
 void rotateByDegrees(int degrees, bool clockwise) {
@@ -94,6 +99,25 @@ void loop() {
           Serial.println("Ingredient Finished " + String(pin));
         }
       }
+    }
+
+    // Stirring Motor Spin
+    else if (command.startsWith("Stir ")) {
+      delay(2000);
+
+      // Start motor
+      digitalWrite(MotorIn4, LOW);
+      analogWrite(MotorIn3, 90);
+      Serial.println("Spinning...");
+
+      delay(6500);
+
+      // Stop motor
+      digitalWrite(MotorIn3, LOW);
+      digitalWrite(MotorIn4, LOW);
+      delay(2000);
+
+      Serial.println("Stirring Complete");
     }
   }
 }
