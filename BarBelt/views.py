@@ -199,8 +199,8 @@ def processRequest(request):
         Their respective amounts left: {', '.join(ingredient_amount_string)}.
         And the following garnishes: {', '.join(garnish_names)}.
         Come up with a drink recipe using some or all of these ingredients, only use ingredient we have.
-        Some ingrediants have run out, don't come up with a recipe without enough ingredient to make it.
-        The quality of your ingredients are top-notch but they are in limited supply. Make small portions if possible.
+        Some ingrediants have run out, so don't come up with a recipe without enough ingredient to make it.
+        Unless user specifies, make the portion size for the drink VERY SMALL.
 
 
         Respond in the following JSON format only (no extra explanation):
