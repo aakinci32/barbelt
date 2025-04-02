@@ -51,6 +51,19 @@ def wait_for_stir_response(arduino, expected="Stirring Finished"):
         except Exception as e:
             print(f"[Serial Read Error] {e}")
 
+def wait_for_arm_response(arduino, expected="Garnish added!"):
+    while True:
+        if arduino.in_waiting > 0:
+            try:
+                raw = arduino.readline()
+                decoded = raw.decode('utf-8', errors='ignore').strip()
+                print(f"[Arduino] {decoded}")
+                if expected in decoded:
+                    print("✅ Found expected response.")
+                    break
+            except Exception as e:
+                print(f"[Serial Read Error] {e}")
+
 
 def wait_for_ingredient_responses(arduino, expected_prefix="Ingredient Finished", count=1):
     finished_pins = set()
@@ -72,20 +85,6 @@ def wait_for_ingredient_responses(arduino, expected_prefix="Ingredient Finished"
 
         except Exception as e:
             print(f"[Serial Read Error] {e}")
-
-
-def wait_for_arm_response(arduino, expected="Garnish added!"):
-    while True:
-        if arduino.in_waiting > 0:
-            try:
-                raw = arduino.readline()
-                decoded = raw.decode('utf-8', errors='ignore').strip()
-                print(f"[Arduino] {decoded}")
-                if expected in decoded:
-                    print("✅ Found expected response.")
-                    break
-            except Exception as e:
-                print(f"[Serial Read Error] {e}")
 
 
 

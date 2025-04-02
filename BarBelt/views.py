@@ -95,7 +95,7 @@ def facialRecognition(request):
 
     # Initialize the webcam
 
-    video_capture = cv2.VideoCapture(0,cv2.CAP_AVFOUNDATION) # 0 FOR ARDA, 1 FOR ROHAN
+    video_capture = cv2.VideoCapture(0,cv2.CAP_AVFOUNDATION) # 0 FOR ARDA, 1 FOR ROHAN, HOWARD
     if not video_capture.isOpened():
         print("Error: Could not open webcam.")
         return
@@ -181,15 +181,27 @@ def processRequest(request):
 
         # Get the actual ingredient and garnish names from the DB
         ingredient_names = list(Ingredient.objects.all().values_list('name', flat=True))
+        ingredient_amount = list(Ingredient.objects.all().values_list('amount', flat=True))
+        ingredient_amount_string = [str(amount) for amount in ingredient_amount]
         garnish_names = list(Garnish.objects.all().values_list('name', flat=True))
         print(ingredient_names)
+        print(ingredient_amount_string)
         print(garnish_names)
+
+        user_prompt = request.POST.get('request', '').strip() 
 
         # Construct the prompt
         request_prompt = f"""
+        You are an assistant to a bartender.
+
+        The user has requested the following: "{user_prompt}"
         Given the following available ingredients: {', '.join(ingredient_names)}.
+        Their respective amounts left: {', '.join(ingredient_amount_string)}.
         And the following garnishes: {', '.join(garnish_names)}.
-        Come up with a creative drink recipe using some or all of these ingredients.
+        Come up with a drink recipe using some or all of these ingredients, only use ingredient we have.
+        Some ingrediants have run out, don't come up with a recipe without enough ingredient to make it.
+        The quality of your ingredients are top-notch but they are in limited supply. Make small portions if possible.
+
 
         Respond in the following JSON format only (no extra explanation):
 

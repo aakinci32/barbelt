@@ -17,11 +17,11 @@ struct Pose {
 
 // === Poses ===
 Pose start_pose = {0, 90, 90, 110};
-Pose wheel_ready = {0, 50, 150, 110};
-Pose wheel_grip = {0, 50, 150, 50};
-Pose cup_mid = {130, 90, 90, 50};
-Pose cup_ready = {130, 140, 70, 50};
-Pose cup_release = {130, 140, 70, 110};
+Pose wheel_ready = {0, 110, 10, 110};
+Pose wheel_grip = {0, 110, 10, 50};
+Pose cup_mid = {0, 90, 90, 50};
+Pose cup_ready = {0, 80, 155, 50};
+Pose cup_release = {0, 80, 155, 110};
 
 // Named poses (expandable)
 struct NamedPose {
@@ -112,19 +112,6 @@ void loop() {
     if (!handled) {
       processManualCommands(input);
     }
-
-    Serial.println("Ready for next command.");
-    Serial.println("Enter manual commands (e.g., B90 A120), or use a pose/sequence name:");
-    Serial.println("Available Sequences:");
-    for (int i = 0; i < NUM_SEQUENCES; i++) {
-      Serial.println("- " + String(sequences[i].name));
-    }
-
-    Serial.println("Available Poses:");
-    for (int i = 0; i < NUM_POSES; i++) {
-      Serial.println("- " + String(poses[i].name));
-    }
-    Serial.println("Current Position: B"+String(base_angle)+" A"+String(arm_angle)+" E"+String(elbow_angle)+" G"+String(grip_angle));
   }
 
   delay(200);
@@ -176,7 +163,7 @@ void moveToPose(Pose targetPose) {
     elbow.write(elbow_angle);
     grip.write(grip_angle);
 
-    delay(30);
+    delay(50);
   }
 
   Serial.println("Pose reached.");
@@ -242,10 +229,10 @@ void runGrabGarnish() {
   Serial.println("Grabbing test Garnish");
   moveToPose(wheel_ready); delay(300);
   grip_angle = 50;
-  grip.write(grip_angle); delay(300);
-  moveToPose(cup_mid); delay(300);
-  moveToPose(cup_ready); delay(300);
-  moveToPose(cup_release); delay(300);
+  grip.write(grip_angle); delay(500);
+  moveToPose(cup_mid); delay(500);
+  moveToPose(cup_ready); delay(500);
+  moveToPose(cup_release); delay(500);
   moveToPose(start_pose); delay(100);
   hardReturn();
   Serial.println("Garnish added!");
