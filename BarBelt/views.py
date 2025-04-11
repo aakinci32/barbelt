@@ -158,8 +158,82 @@ def ingredients(request):
     context = {'ingredients':ingredients, 'garnishes':garnishes}
     return render(request,'ingrediants.html',context)
 
+
+
 def products(request):
-    return render(request,'products.html')
+    drinks = [
+        {
+            "name": "Moscow Mule",
+            "image": "moscow_mule.jpg",
+            "recipe": [
+                {"ingredient": "Vodka", "amount_ml": 50},
+                {"ingredient": "Ginger Beer", "amount_ml": 150},
+                {"ingredient": "Lime Juice", "amount_ml": 10}
+            ],
+            "garnish": "Lime"
+        },
+        {
+            "name": "Tequila Sunrise",
+            "image": "tequilla_sunrise.jpg",
+            "recipe": [
+                {"ingredient": "Tequila", "amount_ml": 50},
+                {"ingredient": "Orange Juice", "amount_ml": 150}
+            ],
+            "garnish": "Orange"
+        },
+        {
+            "name": "Vodka Soda",
+            "image": "vodka_soda.jpg",
+            "recipe": [
+                {"ingredient": "Vodka", "amount_ml": 50},
+                {"ingredient": "Club Soda", "amount_ml": 150}
+            ],
+            "garnish": "Lime"
+        },
+        {
+            "name": "Mexican Mule",
+            "image": "mexican_mule.jpeg",
+            "recipe": [
+                {"ingredient": "Tequila", "amount_ml": 50},
+                {"ingredient": "Ginger Beer", "amount_ml": 150},
+                {"ingredient": "Lime Juice", "amount_ml": 10}
+            ],
+            "garnish": "Lime"
+        },
+        {
+            "name": "Screwdriver",
+            "image": "screwdriver.jpg",
+            "recipe": [
+                {"ingredient": "Vodka", "amount_ml": 50},
+                {"ingredient": "Orange Juice", "amount_ml": 150}
+            ],
+            "garnish": "Orange"
+        },
+        {
+            "name": "Tequila Soda",
+            "image": "tequilla_soda.jpeg",
+            "recipe": [
+                {"ingredient": "Tequila", "amount_ml": 50},
+                {"ingredient": "Club Soda", "amount_ml": 150}
+            ],
+            "garnish": "Lime"
+        },
+    ]
+
+    ingredients = Ingredient.objects.all()
+    garnishes = Garnish.objects.all()
+    ingredient_map = {ing.name: str(ing.id - 1) for ing in ingredients}
+    garnish_map = {g.name: str(g.id - 1) for g in garnishes}
+
+    for drink in drinks:
+        for ing in drink["recipe"]:
+            ing["id"] = ingredient_map.get(ing["ingredient"], -1)
+        drink["garnish_id"] = garnish_map.get(drink["garnish"], "")
+        drink["empty_slots"] = 6 - len(drink["recipe"])
+
+    return render(request, 'products.html', {
+        'drinks': drinks
+    })
 
 def suggestions(request):
     ingredients = Ingredient.objects.all()

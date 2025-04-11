@@ -1,116 +1,189 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Products</title>
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Products</title>
+  <style>
+    body {
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f9f9f9;
+        color: #333;
+    }
+    .header {
+        background: linear-gradient(to right, #4CAF50, #2E7D32);
+        color: white;
+        padding: 30px 20px;
+        text-align: center;
         }
-        th, td {
-            border: 1px solid black;
-            padding: 10px;
-            text-align: center;
+
+    .header h1 {
+        margin: 0;
+        font-size: 36px;
         }
-        th {
-            background-color: #f2f2f2;
+
+    .header p {
+        margin-top: 8px;
+        font-size: 16px;
+        font-weight: 300;
         }
-        .navbar {
-            background-color: #333;
-            overflow: hidden;
-            padding: 10px;
-        }
-        .navbar a {
-            float: left;
-            display: block;
-            color: white;
-            text-align: center;
-            padding: 14px 20px;
-            text-decoration: none;
-        }
-        .navbar a:hover {
-            background-color: #575757;
-        }
-    </style>
+
+
+
+    .navbar {
+        background-color: #2E7D32;
+        overflow: hidden;
+        padding: 12px 20px;
+    }
+
+    .navbar a {
+        float: left;
+        display: block;
+        color: white;
+        text-align: center;
+        padding: 12px 20px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .navbar a:hover {
+      text-decoration: underline;
+    }
+
+    .page-title {
+      text-align: center;
+      margin: 40px 0 20px;
+      font-size: 32px;
+      color: #2E7D32;
+    }
+
+    .cards-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 900px;
+      margin: 0 auto 60px;
+      padding: 0 20px;
+    }
+
+    .drink-card {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 24px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .drink-image {
+      width: 180px;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .drink-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .drink-name {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .ingredient-list {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .garnish {
+      font-style: italic;
+      color: #555;
+    }
+
+    .make-button {
+      align-self: flex-start;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .make-button:hover {
+      background-color: #45a049;
+    }
+
+    form {
+      margin: 0;
+    }
+  </style>
 </head>
 <body>
-    <div class="navbar">
-        <a href="#">Home</a>
-        <a href="{% url 'ingredients' %}">My Ingredients</a> 
-        <a href="{% url 'products' %}">My Products</a>
-        <a href="{% url 'suggestions' %}">Suggestions</a>
+
+<div class="navbar">
+  <a href="{% url 'login_successful' %}">Home</a>
+  <a href="{% url 'ingredients' %}">My Ingredients</a>
+  <a href="{% url 'products' %}">My Products</a>
+  <a href="{% url 'suggestions' %}">Suggestions</a>
+</div>
+
+ <div class="header">
+    <h1>Popular Drinks</h1>
+    <p>Browse our curated drink recipes and make your favorite cocktail</p>
+ </div> 
+
+<div class="cards-container">
+  {% for drink in drinks %}
+    <div class="drink-card">
+      <!-- Image Column -->
+      <img class="drink-image" src="{% static 'images/' %}{{ drink.image }}" alt="{{ drink.name }}">
+
+      <!-- Content Column -->
+      <div class="drink-content">
+        <div class="drink-name">{{ drink.name }}</div>
+
+        <div>
+          <strong>Ingredients:</strong>
+          <ul class="ingredient-list">
+            {% for ing in drink.recipe %}
+              <li>{{ ing.ingredient }} ({{ ing.amount_ml }}mL)</li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div class="garnish">
+          <strong>Garnish:</strong>
+          {% if drink.garnish %} {{ drink.garnish }} {% else %} None {% endif %}
+        </div>
+
+        <form method="POST" action="{% url 'submit_cart' %}">
+          {% csrf_token %}
+          {% for ing in drink.recipe %}
+            <input type="hidden" name="selected_ingredients" value="{{ ing.id }}">
+            <input type="hidden" name="amount_{{ ing.id }}_hidden" value="{{ ing.amount_ml }}">
+          {% endfor %}
+          {% if drink.garnish_id %}
+            <input type="hidden" name="selected_garnish" value="{{ drink.garnish_id }}">
+          {% endif %}
+          <button type="submit" class="make-button">Make This Drink</button>
+        </form>
+      </div>
     </div>
-    <h1>My Products</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Ingredient 1 (mL)</th>
-                <th>Ingredient 2 (mL)</th>
-                <th>Ingredient 3 (mL)</th>
-                <th>Ingredient 4 (mL)</th>
-                <th>Ingredient 5 (mL)</th>
-                <th>Ingredient 6 (mL)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Moscow Mule</td>
-                <td>Vodka (50mL)</td>
-                <td>Ginger Beer (150mL)</td>
-                <td>Lime Juice (10mL)</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-            </tr>
-            <tr>
-                <td>Tequila Sunrise</td>
-                <td>Tequila (50mL)</td>
-                <td>Orange Juice (150mL)</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-            </tr>
-            <tr>
-                <td>Vodka Soda</td>
-                <td>Vodka (50mL)</td>
-                <td>Club Soda (150mL)</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-            </tr>
-            <tr>
-                <td>Mexican Mule</td>
-                <td>Tequila (50mL)</td>
-                <td>Ginger Beer (150mL)</td>
-                <td>Lime Juice (10mL)</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-            </tr>
-            <tr>
-                <td>Screwdriver</td>
-                <td>Vodka (50mL)</td>
-                <td>Orange Juice (150mL)</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-            </tr>
-            <tr>
-                <td>Tequila Soda</td>
-                <td>Tequila (50mL)</td>
-                <td>Club Soda (150mL)</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-            </tr>
-        </tbody>
-    </table>
+  {% endfor %}
+</div>
+
 </body>
 </html>
