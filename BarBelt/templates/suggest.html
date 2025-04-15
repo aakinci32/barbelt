@@ -89,7 +89,7 @@
         }
     </style>
 </head>
-<body onload="speakText('What kind of drink would you like?')">
+<body onload="speakText('Hey {{ name }}! What kind of drink do you want?')">
     <div class="navbar">
         <a href="{% url 'login_successful' %}">Home</a>
         <a href="{% url 'ingredients' %}">My Ingredients</a>
@@ -137,8 +137,8 @@
             const transcript = event.results[0][0].transcript;
             userInput.value = transcript;
 
-            if (transcript.toLowerCase().includes("make it")) {
-                speakText("I will do it right now.");
+            if (transcript.toLowerCase().includes("make it") || transcript.toLowerCase().includes("yes")) {
+                speakText(`I will get started right now ${lastSuggestedDrink.fact}`);
                 makeDrink();
             } else {
                 submitRequest();
@@ -171,7 +171,7 @@
                             html += `<li>${item.ingredient}: ${item.amount_ml} mL</li>`;
                         });
                         html += `</ul>`;
-                        html += `<strong>Garnish:</strong> ${response.garnish || 'None'}`;
+                        html += `<strong>Garnish:</strong> ${response.garnish || 'None'}<br><br>`;
                         $('#responseBox').html(html);
                         $('#make-drink-btn').show();
                         speakText(`Your drink is called ${response.drink_name}. Would you like me to make it or would you like a different one?`);
@@ -219,8 +219,14 @@
             }
 
             form.appendChild(createHiddenInput('csrfmiddlewaretoken', csrfToken));
+
+            // Speak the joke while the drink is being made
+            speakText(lastSuggestedDrink.fact);
+
+            // Submit immediately (runs concurrently with speech)
             form.submit();
         }
+
 
         function createHiddenInput(name, value) {
             const input = document.createElement('input');

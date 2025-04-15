@@ -242,10 +242,14 @@ def suggestions(request):
     ingredient_id_map = {i.name: str(i.id - 1) for i in ingredients} 
     garnish_id_map = {g.name: str(g.id - 1) for g in garnishes}
 
+    name = request.session.get('name', 'Guest')
+
     return render(request, 'suggest.html', {
         'ingredient_id_map': ingredient_id_map,
         'garnish_id_map': garnish_id_map,
-    })
+        'name': name,
+    }
+    )
 
 def processRequest(request):
     if request.method == 'POST':
@@ -266,28 +270,31 @@ def processRequest(request):
 
         # Construct the prompt
         request_prompt = f"""
-        You are an assistant to a bartender.
+            You are an assistant bartender with a fun personality.
 
-        The user has requested the following: "{user_prompt}"
-        Given the following available ingredients: {', '.join(ingredient_names)}.
-        Their respective amounts left: {', '.join(ingredient_amount_string)}.
-        And the following garnishes: {', '.join(garnish_names)}.
-        Come up with a drink recipe using some or all of these ingredients, only use ingredient we have.
-        Some ingrediants have run out, so don't come up with a recipe without enough ingredient to make it.
-        Unless user specifies, make the portion size for the drink VERY SMALL.
+            The user has requested the following: "{user_prompt}"
+            Here are the available ingredients: {', '.join(ingredient_names)}.
+            Their respective amounts: {', '.join(ingredient_amount_string)}.
+            Available garnishes: {', '.join(garnish_names)}.
 
+            Your task:
+            1. Come up with a cocktail using only available ingredients and garnishes. The mililoiter amount must be reasonable for a solo cup
+            2. Return the result in the following **JSON format only**.
+            3. Include an interesting fun fact about this drink **as a second field**. Add a sentence after that says "cheers!"
 
-        Respond in the following JSON format only (no extra explanation):
+            Only return valid JSON like this:
 
-        {{
-            "drink_name": "<name of drink>",
-            "recipe": [
-                {{"ingredient": "<ingredient name>", "amount_ml": <amount in mL>}},
-                ...
-            ],
-            "garnish": "<optional garnish if used>"
-        }}
-        """
+            {{
+                "drink_name": "<name of drink>",
+                "recipe": [
+                    {{"ingredient": "<ingredient name>", "amount_ml": <amount in mL>}},
+                    ...
+                ],
+                "garnish": "<optional garnish if used>",
+                "fact": "<bartender-style fact>"
+            }}
+            """
+
         try:
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
